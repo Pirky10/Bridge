@@ -61,4 +61,4 @@ scripts/local-test/
 
 # Ignore the .claude directory, since it might contain local/project-level setting such as deny and allowlist.
 /.claude
-.new_tools_added/new_tools.txt
+.new_tools_added/
