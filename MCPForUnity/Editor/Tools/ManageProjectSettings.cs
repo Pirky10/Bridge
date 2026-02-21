@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using MCPForUnity.Editor.Helpers;
 using Newtonsoft.Json.Linq;
 using UnityEditor;
+using UnityEditor.Build;
 using UnityEngine;
 
 namespace MCPForUnity.Editor.Tools
@@ -73,9 +74,9 @@ namespace MCPForUnity.Editor.Tools
             Texture2D icon = AssetDatabase.LoadAssetAtPath<Texture2D>(iconPath);
             if (icon == null) return new ErrorResponse($"Icon not found at '{iconPath}'.");
 
-            var icons = PlayerSettings.GetIconsForTargetGroup(BuildTargetGroup.Unknown);
+            var icons = PlayerSettings.GetIcons(NamedBuildTarget.Unknown, IconKind.Application);
             for (int i = 0; i < icons.Length; i++) icons[i] = icon;
-            PlayerSettings.SetIconsForTargetGroup(BuildTargetGroup.Unknown, icons);
+            PlayerSettings.SetIcons(NamedBuildTarget.Unknown, icons, IconKind.Application);
 
             return new SuccessResponse($"Set default icon from '{iconPath}'");
         }
@@ -118,7 +119,7 @@ namespace MCPForUnity.Editor.Tools
                 _ => ScriptingImplementation.Mono2x,
             };
 
-            PlayerSettings.SetScriptingBackend(EditorUserBuildSettings.selectedBuildTargetGroup, impl);
+            PlayerSettings.SetScriptingBackend(NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup), impl);
             return new SuccessResponse($"Scripting backend set to {impl}");
         }
 
@@ -135,7 +136,7 @@ namespace MCPForUnity.Editor.Tools
                 _ => ApiCompatibilityLevel.NET_Standard,
             };
 
-            PlayerSettings.SetApiCompatibilityLevel(EditorUserBuildSettings.selectedBuildTargetGroup, api);
+            PlayerSettings.SetApiCompatibilityLevel(NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup), api);
             return new SuccessResponse($"API compatibility set to {api}");
         }
 
@@ -150,8 +151,8 @@ namespace MCPForUnity.Editor.Tools
                 defaultScreenHeight = PlayerSettings.defaultScreenHeight,
                 fullScreenMode = PlayerSettings.fullScreenMode.ToString(),
                 colorSpace = PlayerSettings.colorSpace.ToString(),
-                scriptingBackend = PlayerSettings.GetScriptingBackend(EditorUserBuildSettings.selectedBuildTargetGroup).ToString(),
-                apiCompatibility = PlayerSettings.GetApiCompatibilityLevel(EditorUserBuildSettings.selectedBuildTargetGroup).ToString(),
+                scriptingBackend = PlayerSettings.GetScriptingBackend(NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup)).ToString(),
+                apiCompatibility = PlayerSettings.GetApiCompatibilityLevel(NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup)).ToString(),
                 showSplash = PlayerSettings.SplashScreen.show,
             });
         }

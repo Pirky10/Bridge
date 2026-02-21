@@ -14,9 +14,11 @@ from transport.legacy.unity_connection import async_send_command_with_retry
 
 @mcp_for_unity_tool(
     description=(
-        "Manages Unity physics: Rigidbodies, Colliders, Physics Materials, Joints, gravity, and raycasting. "
+        "Manages Unity physics: Rigidbodies, Colliders, Physics Materials, Joints (with detailed hinge/spring/configurable settings), gravity, and raycasting. "
         "Actions: add_rigidbody, configure_rigidbody, add_collider, configure_collider, "
-        "create_physics_material, add_joint, configure_joint, set_gravity, raycast, get_physics_info."
+        "create_physics_material, add_joint, configure_joint, configure_hinge_joint, "
+        "configure_spring_joint, configure_configurable_joint, get_joint_info, "
+        "set_gravity, raycast, get_physics_info."
     ),
     annotations=ToolAnnotations(
         title="Manage Physics",
@@ -30,6 +32,8 @@ async def manage_physics(
         "add_collider", "configure_collider",
         "create_physics_material",
         "add_joint", "configure_joint",
+        "configure_hinge_joint", "configure_spring_joint",
+        "configure_configurable_joint", "get_joint_info",
         "set_gravity", "raycast", "get_physics_info"
     ], "Action to perform."],
 
@@ -73,6 +77,18 @@ async def manage_physics(
     axis: Annotated[list[float], "Joint axis [x, y, z]"] | None = None,
     spring_force: Annotated[float, "Spring force for spring joints"] | None = None,
     damper: Annotated[float, "Damper value for spring joints"] | None = None,
+
+    # Advanced Joint settings
+    use_motor: Annotated[bool, "Enable motor on hinge joint"] | None = None,
+    motor_force: Annotated[float, "Motor force for hinge joint"] | None = None,
+    motor_speed: Annotated[float, "Motor target velocity for hinge joint"] | None = None,
+    use_limits: Annotated[bool, "Enable limits on hinge joint"] | None = None,
+    min_limit: Annotated[float, "Minimum angle/distance limit"] | None = None,
+    max_limit: Annotated[float, "Maximum angle/distance limit"] | None = None,
+    target_position: Annotated[list[float], "Target position for configurable joint [x,y,z]"] | None = None,
+    x_motion: Annotated[str, "X motion: Free, Limited, Locked (configurable joint)"] | None = None,
+    y_motion: Annotated[str, "Y motion: Free, Limited, Locked (configurable joint)"] | None = None,
+    z_motion: Annotated[str, "Z motion: Free, Limited, Locked (configurable joint)"] | None = None,
 
     # Gravity
     gravity: Annotated[list[float], "Global gravity vector [x, y, z]"] | None = None,
@@ -118,6 +134,16 @@ async def manage_physics(
         "axis": axis,
         "spring_force": spring_force,
         "damper": damper,
+        "use_motor": use_motor,
+        "motor_force": motor_force,
+        "motor_speed": motor_speed,
+        "use_limits": use_limits,
+        "min_limit": min_limit,
+        "max_limit": max_limit,
+        "target_position": target_position,
+        "x_motion": x_motion,
+        "y_motion": y_motion,
+        "z_motion": z_motion,
         "gravity": gravity,
         "origin": origin,
         "direction": direction_vec,

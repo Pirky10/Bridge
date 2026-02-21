@@ -66,9 +66,8 @@ namespace MCPForUnity.Editor.Tools
                 Undo.RegisterCreatedObjectUndo(go, "Create NavMesh Surface");
             }
 
-            // Mark the object as static for navigation
-            GameObjectUtility.SetStaticEditorFlags(go,
-                GameObjectUtility.GetStaticEditorFlags(go) | StaticEditorFlags.NavigationStatic);
+            // Mark the object as navigation static
+            go.isStatic = true;
 
             EditorUtility.SetDirty(go);
 
@@ -292,6 +291,7 @@ namespace MCPForUnity.Editor.Tools
                 return new ErrorResponse($"End object '{endName}' not found.");
 
             Undo.RecordObject(startGo, "Add OffMeshLink");
+#pragma warning disable CS0618 // OffMeshLink is deprecated but NavMeshLink requires the AI Navigation package
             OffMeshLink link = startGo.AddComponent<OffMeshLink>();
             link.startTransform = startGo.transform;
             link.endTransform = endGo.transform;
@@ -307,6 +307,7 @@ namespace MCPForUnity.Editor.Tools
                 end = endGo.name,
                 biDirectional = link.biDirectional
             });
+#pragma warning restore CS0618
         }
 
         private static object GetNavigationInfo(JObject @params, ToolParams p)

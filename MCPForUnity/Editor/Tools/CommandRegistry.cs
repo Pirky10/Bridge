@@ -68,8 +68,12 @@ namespace MCPForUnity.Editor.Tools
                     })
                     .ToList();
 
-                // Discover tools
-                var toolTypes = allTypes.Where(t => t.GetCustomAttribute<McpForUnityToolAttribute>() != null);
+                // Discover tools — deduplicate by FullName to avoid double-registration
+                // when the same type is visible from multiple loaded assemblies.
+                var toolTypes = allTypes
+                    .Where(t => t.GetCustomAttribute<McpForUnityToolAttribute>() != null)
+                    .GroupBy(t => t.FullName)
+                    .Select(g => g.First());
                 int toolCount = 0;
                 foreach (var type in toolTypes)
                 {
@@ -77,8 +81,11 @@ namespace MCPForUnity.Editor.Tools
                         toolCount++;
                 }
 
-                // Discover resources
-                var resourceTypes = allTypes.Where(t => t.GetCustomAttribute<McpForUnityResourceAttribute>() != null);
+                // Discover resources — same deduplication
+                var resourceTypes = allTypes
+                    .Where(t => t.GetCustomAttribute<McpForUnityResourceAttribute>() != null)
+                    .GroupBy(t => t.FullName)
+                    .Select(g => g.First());
                 int resourceCount = 0;
                 foreach (var type in resourceTypes)
                 {

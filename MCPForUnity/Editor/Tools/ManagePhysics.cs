@@ -35,8 +35,14 @@ namespace MCPForUnity.Editor.Tools
                         return CreatePhysicsMaterial(@params, p);
                     case "add_joint":
                         return AddJoint(@params, p);
-                    case "configure_joint":
-                        return ConfigureJoint(@params, p);
+                    case "configure_hinge_joint":
+                        return ConfigureHingeJoint(@params, p);
+                    case "configure_spring_joint":
+                        return ConfigureSpringJoint(@params, p);
+                    case "configure_configurable_joint":
+                        return ConfigureConfigurableJoint(@params, p);
+                    case "get_joint_info":
+                        return GetJointInfo(@params, p);
                     case "set_gravity":
                         return SetGravity(@params, p);
                     case "raycast":
@@ -44,7 +50,7 @@ namespace MCPForUnity.Editor.Tools
                     case "get_physics_info":
                         return GetPhysicsInfo(@params, p);
                     default:
-                        return new ErrorResponse($"Unknown action: {action}. Valid actions: add_rigidbody, configure_rigidbody, add_collider, configure_collider, create_physics_material, add_joint, configure_joint, set_gravity, raycast, get_physics_info");
+                        return new ErrorResponse($"Unknown action: {action}. Valid actions: add_rigidbody, configure_rigidbody, add_collider, configure_collider, create_physics_material, add_joint, configure_joint, set_gravity, raycast, get_physics_info, configure_hinge_joint, configure_spring_joint, configure_configurable_joint, get_joint_info");
                 }
             }
             catch (Exception ex)
@@ -511,6 +517,144 @@ namespace MCPForUnity.Editor.Tools
             EditorUtility.SetDirty(joint);
 
             return new SuccessResponse($"Configured joint on '{target}'");
+        }
+
+        private static object ConfigureHingeJoint(JObject @params, ToolParams p)
+        {
+            string target = p.Get("target");
+            GameObject go = GameObject.Find(target);
+            if (go == null) return new ErrorResponse($"GameObject '{target}' not found.");
+
+            HingeJoint hinge = go.GetComponent<HingeJoint>();
+            if (hinge == null) return new ErrorResponse($"HingeJoint not found on '{target}'");
+
+            Undo.RecordObject(hinge, "Configure Hinge Joint");
+
+            if (p.Has("use_motor")) hinge.useMotor = p.GetBool("use_motor", hinge.useMotor);
+            if (p.Has("use_limits")) hinge.useLimits = p.GetBool("use_limits", hinge.useLimits);
+            if (p.Has("use_spring")) hinge.useSpring = p.GetBool("use_spring", hinge.useSpring);
+
+            if (p.Has("motor_speed") || p.Has("motor_force") || p.Has("free_spin"))
+            {
+                JointMotor motor = hinge.motor;
+                if (p.Has("motor_speed")) motor.targetVelocity = p.GetFloat("motor_speed") ?? motor.targetVelocity;
+                if (p.Has("motor_force")) motor.force = p.GetFloat("motor_force") ?? motor.force;
+                if (p.Has("free_spin")) motor.freeSpin = p.GetBool("free_spin", motor.freeSpin);
+                hinge.motor = motor;
+            }
+
+            if (p.Has("min_limit") || p.Has("max_limit") || p.Has("bounciness") || p.Has("contact_distance"))
+            {
+                JointLimits limits = hinge.limits;
+                if (p.Has("min_limit")) limits.min = p.GetFloat("min_limit") ?? limits.min;
+                if (p.Has("max_limit")) limits.max = p.GetFloat("max_limit") ?? limits.max;
+                if (p.Has("bounciness")) limits.bounciness = p.GetFloat("bounciness") ?? limits.bounciness;
+                if (p.Has("contact_distance")) limits.contactDistance = p.GetFloat("contact_distance") ?? limits.contactDistance;
+                hinge.limits = limits;
+            }
+
+            EditorUtility.SetDirty(hinge);
+            return new SuccessResponse($"Configured HingeJoint on '{target}'");
+        }
+
+        private static object ConfigureSpringJoint(JObject @params, ToolParams p)
+        {
+            string target = p.Get("target");
+            GameObject go = GameObject.Find(target);
+            if (go == null) return new ErrorResponse($"GameObject '{target}' not found.");
+
+            SpringJoint spring = go.GetComponent<SpringJoint>();
+            if (spring == null) return new ErrorResponse($"SpringJoint not found on '{target}'");
+
+            Undo.RecordObject(spring, "Configure Spring Joint");
+
+            if (p.Has("spring_force")) spring.spring = p.GetFloat("spring_force") ?? spring.spring;
+            if (p.Has("damper")) spring.damper = p.GetFloat("damper") ?? spring.damper;
+            if (p.Has("min_distance")) spring.minDistance = p.GetFloat("min_distance") ?? spring.minDistance;
+            if (p.Has("max_distance")) spring.maxDistance = p.GetFloat("max_distance") ?? spring.maxDistance;
+
+            EditorUtility.SetDirty(spring);
+            return new SuccessResponse($"Configured SpringJoint on '{target}'");
+        }
+
+        private static object ConfigureConfigurableJoint(JObject @params, ToolParams p)
+        {
+            string target = p.Get("target");
+            GameObject go = GameObject.Find(target);
+            if (go == null) return new ErrorResponse($"GameObject '{target}' not found.");
+
+            ConfigurableJoint cj = go.GetComponent<ConfigurableJoint>();
+            if (cj == null) return new ErrorResponse($"ConfigurableJoint not found on '{target}'");
+
+            Undo.RecordObject(cj, "Configure Configurable Joint");
+
+            // Motion settings
+            if (p.Has("x_motion") && Enum.TryParse<ConfigurableJointMotion>(p.Get("x_motion"), true, out var xm)) cj.xMotion = xm;
+            if (p.Has("y_motion") && Enum.TryParse<ConfigurableJointMotion>(p.Get("y_motion"), true, out var ym)) cj.yMotion = ym;
+            if (p.Has("z_motion") && Enum.TryParse<ConfigurableJointMotion>(p.Get("z_motion"), true, out var zm)) cj.zMotion = zm;
+            if (p.Has("angular_x_motion") && Enum.TryParse<ConfigurableJointMotion>(p.Get("angular_x_motion"), true, out var axm)) cj.angularXMotion = axm;
+            if (p.Has("angular_y_motion") && Enum.TryParse<ConfigurableJointMotion>(p.Get("angular_y_motion"), true, out var aym)) cj.angularYMotion = aym;
+            if (p.Has("angular_z_motion") && Enum.TryParse<ConfigurableJointMotion>(p.Get("angular_z_motion"), true, out var azm)) cj.angularZMotion = azm;
+
+            // Target settings
+            JToken targetPosToken = p.GetRaw("target_position");
+            if (targetPosToken != null)
+            {
+                var tp = targetPosToken.ToObject<float[]>();
+                if (tp != null && tp.Length >= 3) cj.targetPosition = new Vector3(tp[0], tp[1], tp[2]);
+            }
+
+            JToken targetVelToken = p.GetRaw("target_velocity");
+            if (targetVelToken != null)
+            {
+                var tv = targetVelToken.ToObject<float[]>();
+                if (tv != null && tv.Length >= 3) cj.targetVelocity = new Vector3(tv[0], tv[1], tv[2]);
+            }
+
+            EditorUtility.SetDirty(cj);
+            return new SuccessResponse($"Configured ConfigurableJoint on '{target}'");
+        }
+
+        private static object GetJointInfo(JObject @params, ToolParams p)
+        {
+            string target = p.Get("target");
+            GameObject go = GameObject.Find(target);
+            if (go == null) return new ErrorResponse($"GameObject '{target}' not found.");
+
+            Joint[] joints = go.GetComponents<Joint>();
+            if (joints.Length == 0) return new ErrorResponse($"No joints found on '{target}'");
+
+            var jointInfos = new List<object>();
+            foreach (var j in joints)
+            {
+                var info = new Dictionary<string, object>
+                {
+                    { "type", j.GetType().Name },
+                    { "connectedBody", j.connectedBody != null ? j.connectedBody.name : null },
+                    { "breakForce", j.breakForce },
+                    { "breakTorque", j.breakTorque }
+                };
+
+                if (j is HingeJoint hinge)
+                {
+                    info["useMotor"] = hinge.useMotor;
+                    info["motor"] = new { speed = hinge.motor.targetVelocity, force = hinge.motor.force };
+                    info["limits"] = new { min = hinge.limits.min, max = hinge.limits.max };
+                }
+                else if (j is SpringJoint spring)
+                {
+                    info["spring"] = spring.spring;
+                    info["damper"] = spring.damper;
+                }
+                else if (j is ConfigurableJoint cj)
+                {
+                    info["motion"] = new { x = cj.xMotion.ToString(), y = cj.yMotion.ToString(), z = cj.zMotion.ToString() };
+                }
+
+                jointInfos.Add(info);
+            }
+
+            return new SuccessResponse($"Joint info for '{target}'", new { joints = jointInfos });
         }
 
         private static object SetGravity(JObject @params, ToolParams p)

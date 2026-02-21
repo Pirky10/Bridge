@@ -27,7 +27,10 @@ namespace MCPForUnity.Editor.Tools
             "create_sprite",
             "apply_pattern",
             "apply_gradient",
-            "apply_noise"
+            "apply_noise",
+            "create_render_texture",
+            "configure_render_texture",
+            "assign_render_texture"
         };
 
         private static ErrorResponse ValidateDimensions(int width, int height, List<string> warnings)
@@ -78,6 +81,12 @@ namespace MCPForUnity.Editor.Tools
                         return ApplyGradient(@params);
                     case "apply_noise":
                         return ApplyNoise(@params);
+                    case "create_render_texture":
+                        return CreateRenderTexture(@params);
+                    case "configure_render_texture":
+                        return ConfigureRenderTexture(@params);
+                    case "assign_render_texture":
+                        return AssignRenderTexture(@params);
                     default:
                         return new ErrorResponse($"Unknown action: '{action}'");
                 }
@@ -1020,6 +1029,95 @@ namespace MCPForUnity.Editor.Tools
                 return imagePath;
 
             return Path.Combine(Directory.GetCurrentDirectory(), imagePath);
+        }
+
+        private static object CreateRenderTexture(JObject @params)
+        {
+            string path = @params["path"]?.ToString();
+            if (string.IsNullOrEmpty(path))
+                return new ErrorResponse("'path' is required for create_render_texture.");
+
+            int width = @params["width"]?.ToObject<int>() ?? 256;
+            int height = @params["height"]?.ToObject<int>() ?? 256;
+            int depth = @params["depth"]?.ToObject<int>() ?? 24;
+
+            string fullPath = AssetPathUtility.SanitizeAssetPath(path);
+            if (!fullPath.EndsWith(".renderTexture", StringComparison.OrdinalIgnoreCase))
+                fullPath += ".renderTexture";
+
+            EnsureDirectoryExists(fullPath);
+
+            RenderTexture rt = new RenderTexture(width, height, depth);
+
+            // Apply format if provided
+            if (@params["format"] != null)
+            {
+                if (TryParseEnum<RenderTextureFormat>(@params["format"].ToString(), out var format))
+                    rt.format = format;
+            }
+
+            AssetDatabase.CreateAsset(rt, fullPath);
+            AssetDatabase.SaveAssets();
+
+            return new SuccessResponse($"RenderTexture created at '{fullPath}'", new { path = fullPath, width, height, depth });
+        }
+
+        private static object ConfigureRenderTexture(JObject @params)
+        {
+            string path = @params["path"]?.ToString();
+            if (string.IsNullOrEmpty(path))
+                return new ErrorResponse("'path' is required for configure_render_texture.");
+
+            string fullPath = AssetPathUtility.SanitizeAssetPath(path);
+            RenderTexture rt = AssetDatabase.LoadAssetAtPath<RenderTexture>(fullPath);
+            if (rt == null) return new ErrorResponse($"RenderTexture not found at '{fullPath}'");
+
+            Undo.RecordObject(rt, "Configure RenderTexture");
+
+            if (@params["width"] != null) rt.width = @params["width"].ToObject<int>();
+            if (@params["height"] != null) rt.height = @params["height"].ToObject<int>();
+            if (@params["useMipMap"] != null) rt.useMipMap = @params["useMipMap"].ToObject<bool>();
+            if (@params["autoGenerateMips"] != null) rt.autoGenerateMips = @params["autoGenerateMips"].ToObject<bool>();
+            if (@params["wrapMode"] != null)
+            {
+                if (TryParseEnum<TextureWrapMode>(@params["wrapMode"].ToString(), out var wrapMode))
+                    rt.wrapMode = wrapMode;
+            }
+            if (@params["filterMode"] != null)
+            {
+                if (TryParseEnum<FilterMode>(@params["filterMode"].ToString(), out var filterMode))
+                    rt.filterMode = filterMode;
+            }
+
+            EditorUtility.SetDirty(rt);
+            AssetDatabase.SaveAssets();
+
+            return new SuccessResponse($"Configured RenderTexture at '{fullPath}'");
+        }
+
+        private static object AssignRenderTexture(JObject @params)
+        {
+            string path = @params["path"]?.ToString();
+            string target = @params["target"]?.ToString();
+
+            if (string.IsNullOrEmpty(path)) return new ErrorResponse("'path' (RenderTexture asset) is required.");
+            if (string.IsNullOrEmpty(target)) return new ErrorResponse("'target' (Camera GameObject) is required.");
+
+            GameObject go = GameObject.Find(target);
+            if (go == null) return new ErrorResponse($"GameObject '{target}' not found.");
+
+            Camera cam = go.GetComponent<Camera>();
+            if (cam == null) return new ErrorResponse($"Camera component not found on '{target}'.");
+
+            string fullPath = AssetPathUtility.SanitizeAssetPath(path);
+            RenderTexture rt = AssetDatabase.LoadAssetAtPath<RenderTexture>(fullPath);
+            if (rt == null) return new ErrorResponse($"RenderTexture not found at '{fullPath}'");
+
+            Undo.RecordObject(cam, "Assign RenderTexture to Camera");
+            cam.targetTexture = rt;
+            EditorUtility.SetDirty(cam);
+
+            return new SuccessResponse($"Assigned RenderTexture '{fullPath}' to Camera '{target}'");
         }
     }
 }

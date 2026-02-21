@@ -133,7 +133,9 @@ namespace MCPForUnity.Editor.Tools
                 }
 
                 if (p.Has("compress_lightmaps"))
-                    settings.compressLightmaps = p.GetBool("compress_lightmaps", true);
+                    settings.lightmapCompression = p.GetBool("compress_lightmaps", true)
+                        ? LightmapCompression.NormalQuality
+                        : LightmapCompression.None;
 
                 if (p.Has("ambient_occlusion"))
                     settings.ao = p.GetBool("ambient_occlusion", false);
@@ -226,7 +228,7 @@ namespace MCPForUnity.Editor.Tools
                 info["directResolution"] = settings.lightmapResolution;
                 info["maxSize"] = settings.lightmapMaxSize;
                 info["bounces"] = settings.maxBounces;
-                info["compressLightmaps"] = settings.compressLightmaps;
+                info["lightmapCompression"] = settings.lightmapCompression.ToString();
                 info["ao"] = settings.ao;
             }
 

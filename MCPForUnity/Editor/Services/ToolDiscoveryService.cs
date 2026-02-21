@@ -45,9 +45,18 @@ namespace MCPForUnity.Editor.Services
                 var metadata = ExtractToolMetadata(type, toolAttr);
                 if (metadata != null)
                 {
-                    if (_cachedTools.ContainsKey(metadata.Name))
+                    if (_cachedTools.TryGetValue(metadata.Name, out var existing))
                     {
-                        McpLog.Warn($"Duplicate tool name '{metadata.Name}' from {type.FullName}; overwriting previous registration.");
+                        // Only warn if it's a genuinely different type, not a duplicate from multiple assembly loads
+                        if (existing.ClassName != type.Name || existing.Namespace != (type.Namespace ?? ""))
+                        {
+                            McpLog.Warn($"Duplicate tool name '{metadata.Name}' from {type.FullName}; overwriting previous registration.");
+                        }
+                        // else: same type seen again from another assembly — skip silently
+                        else
+                        {
+                            continue;
+                        }
                     }
                     _cachedTools[metadata.Name] = metadata;
                     EnsurePreferenceInitialized(metadata);

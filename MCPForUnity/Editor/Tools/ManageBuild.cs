@@ -4,6 +4,7 @@ using System.Linq;
 using MCPForUnity.Editor.Helpers;
 using Newtonsoft.Json.Linq;
 using UnityEditor;
+using UnityEditor.Build;
 using UnityEngine;
 
 namespace MCPForUnity.Editor.Tools
@@ -72,8 +73,8 @@ namespace MCPForUnity.Editor.Tools
                 productName = PlayerSettings.productName,
                 bundleVersion = PlayerSettings.bundleVersion,
                 scenes = sceneList,
-                scriptingBackend = PlayerSettings.GetScriptingBackend(EditorUserBuildSettings.selectedBuildTargetGroup).ToString(),
-                apiCompatibilityLevel = PlayerSettings.GetApiCompatibilityLevel(EditorUserBuildSettings.selectedBuildTargetGroup).ToString()
+                scriptingBackend = PlayerSettings.GetScriptingBackend(NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup)).ToString(),
+                apiCompatibilityLevel = PlayerSettings.GetApiCompatibilityLevel(NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup)).ToString()
             });
         }
 
@@ -221,13 +222,13 @@ namespace MCPForUnity.Editor.Tools
             if (!Enum.TryParse<ScriptingImplementation>(backend, true, out var scriptingBackend))
                 return new ErrorResponse($"Unknown scripting backend: {backend}. Valid: Mono2x, IL2CPP");
 
-            BuildTargetGroup group = EditorUserBuildSettings.selectedBuildTargetGroup;
-            PlayerSettings.SetScriptingBackend(group, scriptingBackend);
+            var namedTarget = NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
+            PlayerSettings.SetScriptingBackend(namedTarget, scriptingBackend);
 
             return new SuccessResponse($"Set scripting backend to {scriptingBackend}", new
             {
                 backend = scriptingBackend.ToString(),
-                targetGroup = group.ToString()
+                targetGroup = namedTarget.ToString()
             });
         }
 
