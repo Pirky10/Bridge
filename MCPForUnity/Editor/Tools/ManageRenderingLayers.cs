@@ -91,8 +91,10 @@ namespace MCPForUnity.Editor.Tools
                 return new SuccessResponse($"Renamed rendering layer {index.Value} to '{layerName}'");
             }
 
-            // Fallback: try RenderPipelineGlobalSettings
-            var globalSettings = GraphicsSettings.currentRenderPipelineGlobalSettings;
+            // Fallback: try RenderPipelineGlobalSettings via reflection
+            var globalSettingsProp = typeof(GraphicsSettings).GetProperty("currentRenderPipelineGlobalSettings",
+                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            var globalSettings = globalSettingsProp?.GetValue(null) as UnityEngine.Object;
             if (globalSettings != null)
             {
                 SerializedObject gso = new SerializedObject(globalSettings);

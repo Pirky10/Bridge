@@ -75,10 +75,7 @@ namespace MCPForUnity.Editor.Tools
                 pipelineAssetType = defaultRP != null ? defaultRP.GetType().FullName : "Built-in",
                 colorSpace = PlayerSettings.colorSpace.ToString(),
                 graphicsApiWindows = PlayerSettings.GetGraphicsAPIs(BuildTarget.StandaloneWindows64),
-                tier1 = new
-                {
-                    hdr = EditorGraphicsSettings.GetTierSettings(BuildTargetGroup.Standalone, GraphicsTier.Tier1).hdr
-                }
+                isLinearColorSpace = PlayerSettings.colorSpace == ColorSpace.Linear
             });
         }
 

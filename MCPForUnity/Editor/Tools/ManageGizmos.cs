@@ -229,11 +229,11 @@ public class GizmoDrawer_{target.Replace(" ", "_")} : MonoBehaviour
             int iconEnabled = p.GetBool("icon_enabled", true) ? 1 : 0;
 
             // Use GizmoUtility via reflection (Unity 2022+)
-            Type gizmoUtilType = typeof(Editor).Assembly.GetType("UnityEditor.GizmoUtility");
+            Type gizmoUtilType = typeof(UnityEditor.Editor).Assembly.GetType("UnityEditor.GizmoUtility");
             if (gizmoUtilType != null)
             {
                 // Try to find the annotation
-                var getAnnotations = typeof(Editor).Assembly.GetType("UnityEditor.AnnotationUtility");
+                var getAnnotations = typeof(UnityEditor.Editor).Assembly.GetType("UnityEditor.AnnotationUtility");
                 if (getAnnotations != null)
                 {
                     var setGizmo = getAnnotations.GetMethod("SetGizmoEnabled",

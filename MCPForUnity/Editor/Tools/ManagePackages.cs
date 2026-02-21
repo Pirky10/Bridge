@@ -75,8 +75,7 @@ namespace MCPForUnity.Editor.Tools
                     name = pkg.name,
                     version = pkg.version,
                     displayName = pkg.displayName,
-                    source = pkg.source.ToString(),
-                    status = pkg.status.ToString()
+                    source = pkg.source.ToString()
                 });
             }
 
@@ -128,7 +127,7 @@ namespace MCPForUnity.Editor.Tools
             var queryError = queryResult.GetOrError(out string query);
             if (queryError != null) return queryError;
 
-            var searchRequest = Client.SearchAll(query);
+            var searchRequest = Client.Search(query);
 
             if (!WaitForRequest(searchRequest))
                 return new ErrorResponse("Package search request timed out.");
@@ -177,7 +176,6 @@ namespace MCPForUnity.Editor.Tools
                         displayName = pkg.displayName,
                         description = pkg.description,
                         source = pkg.source.ToString(),
-                        status = pkg.status.ToString(),
                         resolvedPath = pkg.resolvedPath,
                         dependencies = System.Array.ConvertAll(
                             pkg.dependencies ?? new UnityEditor.PackageManager.DependencyInfo[0],

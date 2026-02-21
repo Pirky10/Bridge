@@ -118,7 +118,9 @@ namespace MCPForUnity.Editor.Tools
                     try
                     {
                         var blendObj = blendProp.GetValue(brain);
-                        var timeProp = blendObj.GetType().GetField("m_Time") ?? blendObj.GetType().GetProperty("Time");
+                        System.Reflection.FieldInfo timeField = blendObj.GetType().GetField("m_Time");
+                        System.Reflection.PropertyInfo timePropInfo = blendObj.GetType().GetProperty("Time");
+                        System.Reflection.MemberInfo timeProp = (System.Reflection.MemberInfo)timeField ?? timePropInfo;
                         if (timeProp != null)
                         {
                             if (timeProp is System.Reflection.FieldInfo fi) fi.SetValue(blendObj, defaultBlend.Value);
@@ -181,7 +183,9 @@ namespace MCPForUnity.Editor.Tools
             float? fov = p.GetFloat("fov");
             if (fov.HasValue)
             {
-                var lensProp = vcamType.GetProperty("m_Lens") ?? vcamType.GetField("m_Lens");
+                System.Reflection.PropertyInfo lensPropInfo = vcamType.GetProperty("m_Lens");
+                System.Reflection.FieldInfo lensFieldInfo = vcamType.GetField("m_Lens");
+                System.Reflection.MemberInfo lensProp = (System.Reflection.MemberInfo)lensPropInfo ?? lensFieldInfo;
                 if (lensProp != null)
                 {
                     try
