@@ -383,7 +383,7 @@ async def apply_text_edits(
 
 @mcp_for_unity_tool(
     unity_target="manage_script",
-    description="Create a new C# script at the given project path.",
+    description="Create a new C# script at the given project path. Fails if the script already exists — use delete_script first to overwrite, or use script_apply_edits/apply_text_edits to modify an existing script.",
     annotations=ToolAnnotations(
         title="Create Script",
         destructiveHint=True,

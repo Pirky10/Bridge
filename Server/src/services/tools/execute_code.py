@@ -16,7 +16,10 @@ from transport.legacy.unity_connection import async_send_command_with_retry
     description=(
         "Executes arbitrary C# code in the Unity Editor context. "
         "Actions: run (execute a code block), evaluate (evaluate an expression), "
-        "run_static_method (call an existing static method by type and name)."
+        "run_static_method (call an existing static method by type and name). "
+        "WARNING: Do NOT use this to create, modify, or delete script files "
+        "(no System.IO.File calls for .cs files). Use create_script, delete_script, "
+        "script_apply_edits, or apply_text_edits instead."
     ),
     annotations=ToolAnnotations(
         title="Execute Code",

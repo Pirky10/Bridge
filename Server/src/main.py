@@ -315,14 +315,41 @@ Resources vs Tools:
 - Always check related resources before modifying the engine state with tools
 
 Script Management:
-- After creating or modifying scripts (by your own tools or the `manage_script` tool) use `read_console` to check for compilation errors before proceeding
+- Script CRUD tools (preferred for all file operations):
+  - `create_script` — create new scripts (fails if the file already exists)
+  - `delete_script` — delete existing scripts
+  - `script_apply_edits` — structured edits (replace/insert/delete methods) — safest for targeted changes
+  - `apply_text_edits` — line/column range edits — use when you know exact positions
+  - `manage_script(action='read')` — read script contents
+- To modify an existing script, prefer `script_apply_edits` or `apply_text_edits`. Only use `delete_script` then `create_script` for a complete rewrite.
+- After creating or modifying scripts, use `read_console` to check for compilation errors before proceeding
 - Only after successful compilation can new components/types be used
 - You can poll the `editor_state` resource's `isCompiling` field to check if the domain reload is complete
+
+execute_code Best Practices:
+- Use execute_code for runtime inspection, querying Unity state, and one-off operations
+- NEVER use execute_code with System.IO.File to create/modify/delete script files — use the script tools above instead
+- Keep execute_code snippets short and focused on a single task
 
 Scene Setup:
 - Always include a Camera and main Light (Directional Light) in new scenes
 - Create prefabs with `manage_asset` for reusable GameObjects
 - Use `manage_scene` to load, save, and query scene information
+
+Component Placement:
+- Think carefully about WHICH GameObject a component should be added to based on its purpose:
+  - Scripts that control a specific object's behavior → add to THAT object (e.g., a glow toggle script goes on the object that glows, not on a global volume)
+  - Scripts that affect the whole scene → add to a manager/global object
+  - Physics components (Rigidbody, Collider) → add to the object that needs physics
+- Before adding a component, check the scene hierarchy to understand the existing structure
+- When in doubt, use `find_gameobjects` to locate the right target before using `manage_components`
+
+Hierarchy Organization:
+- Keep the scene hierarchy clean and organized:
+  - Group related GameObjects under empty parent GameObjects (e.g., group all lights under "--- Lighting ---", all UI under "--- UI ---", all environment objects under "--- Environment ---")
+  - Use `manage_gameobject(action='create')` to create empty organizer objects, then parent related objects to them using `manage_gameobject(action='modify')` with the `parent` parameter
+  - Name organizer objects clearly (e.g., "--- Enemies ---", "--- Props ---", "--- Audio ---")
+- After creating multiple objects, consider grouping them to keep the hierarchy navigable
 
 Path Conventions:
 - Unless specified otherwise, all paths are relative to the project's `Assets/` folder
