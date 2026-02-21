@@ -14,6 +14,7 @@ from transport.legacy.unity_connection import async_send_command_with_retry
 
 
 @mcp_for_unity_tool(
+    unity_target=None,
     description=(
         "Explains Unity C# code: what it does, how it works, and why certain patterns "
         "are used. Can explain entire scripts, specific methods, Unity APIs, design "

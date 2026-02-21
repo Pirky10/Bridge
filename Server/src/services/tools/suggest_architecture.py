@@ -14,6 +14,7 @@ from transport.legacy.unity_connection import async_send_command_with_retry
 
 
 @mcp_for_unity_tool(
+    unity_target=None,
     description=(
         "Suggests architecture patterns for Unity projects. Analyzes current project "
         "structure and recommends design patterns (MVC, ECS, Singleton, Observer, "

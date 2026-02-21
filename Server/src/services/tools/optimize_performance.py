@@ -14,6 +14,7 @@ from transport.legacy.unity_connection import async_send_command_with_retry
 
 
 @mcp_for_unity_tool(
+    unity_target=None,
     description=(
         "Analyzes Unity project performance and suggests optimizations. "
         "Gathers profiler data, analyzes scripts for common performance issues, "

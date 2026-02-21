@@ -14,6 +14,7 @@ from transport.legacy.unity_connection import async_send_command_with_retry
 
 
 @mcp_for_unity_tool(
+    unity_target=None,
     description=(
         "Reviews Unity C# scripts for quality, performance, best practices, and bugs. "
         "Reads the script content from the project and analyzes it. "

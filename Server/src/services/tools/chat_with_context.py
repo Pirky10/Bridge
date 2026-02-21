@@ -14,6 +14,7 @@ from transport.legacy.unity_connection import async_send_command_with_retry
 
 
 @mcp_for_unity_tool(
+    unity_target=None,
     description=(
         "Provides contextual AI chat with awareness of the Unity project. "
         "Gathers relevant project context (hierarchy, scripts, settings, logs) "

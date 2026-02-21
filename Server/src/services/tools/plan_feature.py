@@ -14,6 +14,7 @@ from transport.legacy.unity_connection import async_send_command_with_retry
 
 
 @mcp_for_unity_tool(
+    unity_target=None,
     description=(
         "Plans a Unity feature: gathers project context (scene hierarchy, existing scripts, "
         "packages) and returns a structured implementation plan with steps, dependencies, "

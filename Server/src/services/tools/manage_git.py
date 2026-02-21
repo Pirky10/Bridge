@@ -16,6 +16,7 @@ from transport.legacy.unity_connection import async_send_command_with_retry
 
 
 @mcp_for_unity_tool(
+    unity_target=None,
     description=(
         "Manages Git operations for the Unity project: status, diff, log, "
         "branch management, staging, committing, stashing, and more. "

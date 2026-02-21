@@ -14,6 +14,7 @@ from transport.legacy.unity_connection import async_send_command_with_retry
 
 
 @mcp_for_unity_tool(
+    unity_target=None,
     description=(
         "Generates documentation for Unity scripts and projects: XML doc comments, "
         "README files, API reference, usage examples, and architecture docs. "

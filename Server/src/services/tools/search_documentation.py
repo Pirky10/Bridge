@@ -14,8 +14,9 @@ from services.registry import mcp_for_unity_tool
 
 
 @mcp_for_unity_tool(
+    unity_target=None,
     description=(
-        "Searches Unity documentation and Scripting API. Uses free web scraping "
+        "Searches Unity documentation and common community sites (Stack Overflow, forums). "
         "(no API key). Can search Unity Manual, Scripting API, Unity Forums, "
         "and Unity Learn. Returns relevant doc pages with summaries."
     ),

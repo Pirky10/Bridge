@@ -14,6 +14,7 @@ from transport.legacy.unity_connection import async_send_command_with_retry
 
 
 @mcp_for_unity_tool(
+    unity_target=None,
     description=(
         "Debugs Unity issues by analyzing error messages, console logs, stack traces, "
         "and relevant script content. Identifies root causes and suggests fixes. "

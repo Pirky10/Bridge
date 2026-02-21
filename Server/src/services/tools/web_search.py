@@ -14,6 +14,7 @@ from services.registry import mcp_for_unity_tool
 
 
 @mcp_for_unity_tool(
+    unity_target=None,
     description=(
         "Searches the web using DuckDuckGo (free, no API key). "
         "Returns search results with titles, URLs, and snippets. "
