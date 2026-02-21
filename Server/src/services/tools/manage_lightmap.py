@@ -29,7 +29,6 @@ async def manage_lightmap(
     ambient_occlusion: Annotated[bool, "Enable ambient occlusion"] | None = None,
     ao_max_distance: Annotated[float, "AO max distance"] | None = None,
     receive_gi: Annotated[str, "Receive GI mode: lightmaps, lightprobes"] | None = None,
-    **kwargs,
 ) -> dict[str, Any]:
     unity_instance = get_unity_instance_from_context(ctx)
     params_dict = {k: v for k, v in {
