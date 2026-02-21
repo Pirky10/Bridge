@@ -27,12 +27,43 @@ from transport.legacy.unity_connection import async_send_command_with_retry
 )
 async def optimize_performance(
     ctx: Context,
-    area: Annotated[str, "Area to optimize: rendering, physics, scripting, memory, loading, all"] | None = None,
+    area: Annotated[str, "Area to optimize: rendering, physics, scripting, memory, loading, all, list_high_poly"] | None = None,
     script_path: Annotated[str, "Specific script to analyze for performance"] | None = None,
     target_platform: Annotated[str, "Target platform: PC, Mobile, Console, VR"] | None = None,
     target_fps: Annotated[int, "Target FPS"] | None = None,
+    poly_threshold: Annotated[int, "Polygon threshold for list_high_poly (default: 10000)"] | None = None,
 ) -> dict[str, Any]:
     unity_instance = get_unity_instance_from_context(ctx)
+
+    # Handle list_high_poly as a direct Unity code execution
+    if (area or "").lower() == "list_high_poly":
+        threshold = poly_threshold or 10000
+        code = f"""
+var results = new System.Collections.Generic.List<object>();
+foreach (var mf in UnityEngine.Object.FindObjectsOfType<UnityEngine.MeshFilter>())
+{{
+    if (mf.sharedMesh != null && mf.sharedMesh.triangles.Length / 3 >= {threshold})
+    {{
+        results.Add(new {{ name = mf.gameObject.name, path = GetPath(mf.transform),
+            triangles = mf.sharedMesh.triangles.Length / 3, vertices = mf.sharedMesh.vertexCount,
+            meshName = mf.sharedMesh.name }});
+    }}
+}}
+string GetPath(UnityEngine.Transform t) {{
+    string p = t.name;
+    while (t.parent != null) {{ t = t.parent; p = t.name + "/" + p; }}
+    return p;
+}}
+return new {{ success = true, threshold = {threshold}, count = results.Count, objects = results }};
+"""
+        result = await send_with_unity_instance(
+            async_send_command_with_retry, unity_instance,
+            "execute_code", {
+                "action": "run",
+                "code": code,
+            }
+        )
+        return result if isinstance(result, dict) else {"success": False, "message": str(result)}
 
     context_data = {}
 

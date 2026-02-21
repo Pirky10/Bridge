@@ -895,6 +895,28 @@ Examples:
         logger.info(f"Starting FastMCP with HTTP transport on {host}:{port}")
         mcp.run(transport=transport, host=host, port=port)
     else:
+        # Background HTTP server bridge for Unity connection while running MCP via stdio
+        enable_http_bridge = (
+            os.environ.get("UNITY_MCP_ENABLE_HTTP_SERVER", "").lower() in ("1", "true", "yes", "on")
+        )
+        
+        if enable_http_bridge:
+            import uvicorn
+            
+            # Determine host/port for the bridge
+            bridge_host = os.environ.get("UNITY_MCP_HTTP_HOST") or "127.0.0.1"
+            bridge_port = int(os.environ.get("UNITY_MCP_HTTP_PORT") or 8080)
+            
+            def start_http_bridge():
+                logger.info(f"Starting background HTTP bridge on {bridge_host}:{bridge_port}")
+                try:
+                    uvicorn.run(mcp.http_app, host=bridge_host, port=bridge_port, log_level="warning")
+                except Exception as e:
+                    logger.error(f"HTTP bridge failed to start (port likely in use): {e}")
+
+            # Start bridge in a separate thread so stdio transport can continue
+            threading.Thread(target=start_http_bridge, daemon=True).start()
+
         # Use stdio transport for traditional MCP
         logger.info("Starting FastMCP with stdio transport")
         mcp.run(transport='stdio')

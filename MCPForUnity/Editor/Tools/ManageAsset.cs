@@ -109,6 +109,27 @@ namespace MCPForUnity.Editor.Tools
                     case "get_components":
                         return GetComponentsFromAsset(path);
 
+                    case "export_package":
+                    {
+                        string exportPath = @params["exportPath"]?.ToString();
+                        if (string.IsNullOrEmpty(exportPath))
+                            return new ErrorResponse("'exportPath' is required for export_package.");
+
+                        bool includeDeps = @params["includeDependencies"]?.ToObject<bool>() ?? true;
+                        var flags = ExportPackageOptions.Recurse;
+                        if (includeDeps)
+                            flags |= ExportPackageOptions.IncludeDependencies;
+
+                        string sanitizedPath = AssetPathUtility.SanitizeAssetPath(path);
+                        AssetDatabase.ExportPackage(sanitizedPath, exportPath, flags);
+                        return new SuccessResponse($"Exported package to '{exportPath}'", new
+                        {
+                            sourcePath = sanitizedPath,
+                            exportPath,
+                            includeDependencies = includeDeps
+                        });
+                    }
+
                     default:
                         // This error message is less likely to be hit now, but kept here as a fallback or for potential future modifications.
                         string validActionsListDefault = string.Join(", ", ValidActions);

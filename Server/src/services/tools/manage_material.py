@@ -15,7 +15,7 @@ from transport.legacy.unity_connection import async_send_command_with_retry
 
 
 @mcp_for_unity_tool(
-    description="Manages Unity materials (set properties, colors, shaders, etc). Read-only actions: ping, get_material_info. Modifying actions: create, set_material_shader_property, set_material_color, assign_material_to_renderer, set_renderer_color.",
+    description="Manages Unity materials (set properties, colors, shaders, etc). Read-only actions: ping, get_material_info. Modifying actions: create, set_material_shader_property, set_material_color, assign_material_to_renderer, set_renderer_color, assign_material_to_fbx.",
     annotations=ToolAnnotations(
         title="Manage Material",
         destructiveHint=True,
@@ -30,7 +30,8 @@ async def manage_material(
         "set_material_color",
         "assign_material_to_renderer",
         "set_renderer_color",
-        "get_material_info"
+        "get_material_info",
+        "assign_material_to_fbx"
     ], "Action to perform."],
 
     # Common / Shared
@@ -60,6 +61,9 @@ async def manage_material(
     slot: Annotated[int, "Material slot index (0-based)"] | None = None,
     mode: Annotated[Literal["shared", "instance", "property_block"],
                     "Assignment/modification mode"] | None = None,
+
+    # assign_material_to_fbx
+    fbx_path: Annotated[str, "Path to FBX asset (Assets/...) for assign_material_to_fbx"] | None = None,
 
 ) -> dict[str, Any]:
     unity_instance = await get_unity_instance_from_context(ctx)
@@ -94,7 +98,8 @@ async def manage_material(
         "target": target,
         "searchMethod": search_method,
         "slot": slot,
-        "mode": mode
+        "mode": mode,
+        "fbxPath": fbx_path
     }
 
     # Remove None values

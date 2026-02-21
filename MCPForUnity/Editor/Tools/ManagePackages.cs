@@ -36,8 +36,30 @@ namespace MCPForUnity.Editor.Tools
                         return SearchPackage(@params, p);
                     case "get_info":
                         return GetPackageInfo(@params, p);
+                    case "install_git_package":
+                    {
+                        string gitUrl = @params["gitUrl"]?.ToString();
+                        if (string.IsNullOrEmpty(gitUrl))
+                            return new ErrorResponse("'gitUrl' is required for install_git_package.");
+
+                        var addRequest = UnityEditor.PackageManager.Client.Add(gitUrl);
+                        while (!addRequest.IsCompleted)
+                            System.Threading.Thread.Sleep(100);
+
+                        if (addRequest.Status == UnityEditor.PackageManager.StatusCode.Success)
+                        {
+                            var pkg = addRequest.Result;
+                            return new SuccessResponse($"Installed package from Git: {pkg.packageId}", new
+                            {
+                                packageId = pkg.packageId,
+                                version = pkg.version,
+                                displayName = pkg.displayName
+                            });
+                        }
+                        return new ErrorResponse($"Failed to install from Git URL '{gitUrl}': {addRequest.Error?.message}");
+                    }
                     default:
-                        return new ErrorResponse($"Unknown action: {action}. Valid actions: list, install, remove, search, get_info");
+                        return new ErrorResponse($"Unknown action: {action}. Valid actions: list, install, remove, search, get_info, install_git_package");
                 }
             }
             catch (Exception ex)

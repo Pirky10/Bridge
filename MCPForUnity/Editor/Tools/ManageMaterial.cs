@@ -44,6 +44,9 @@ namespace MCPForUnity.Editor.Tools
                     case "get_material_info":
                         return GetMaterialInfo(@params);
 
+                    case "assign_material_to_fbx":
+                        return AssignMaterialToFbx(@params);
+
                     default:
                         return new ErrorResponse($"Unknown action: {action}");
                 }
@@ -688,6 +691,78 @@ namespace MCPForUnity.Editor.Tools
                     UnityEngine.Object.DestroyImmediate(material);
                 }
             }
+        }
+
+        private static object AssignMaterialToFbx(JObject @params)
+        {
+            string fbxPath = @params["fbxPath"]?.ToString();
+            if (string.IsNullOrEmpty(fbxPath))
+                return new ErrorResponse("'fbxPath' is required.");
+
+            string materialPath = @params["material_path"]?.ToString();
+            if (string.IsNullOrEmpty(materialPath))
+                return new ErrorResponse("'material_path' is required.");
+
+            int slot = @params["slot"]?.ToObject<int>() ?? 0;
+
+            fbxPath = AssetPathUtility.SanitizeAssetPath(fbxPath);
+            materialPath = AssetPathUtility.SanitizeAssetPath(materialPath);
+
+            var importer = AssetImporter.GetAtPath(fbxPath) as ModelImporter;
+            if (importer == null)
+                return new ErrorResponse($"No ModelImporter found at '{fbxPath}'. Is it an FBX/model file?");
+
+            var material = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
+            if (material == null)
+                return new ErrorResponse($"Material not found at '{materialPath}'.");
+
+            // Use the external material remapping
+            var sourceMap = importer.GetExternalObjectMap();
+            var renderers = AssetDatabase.LoadAllAssetsAtPath(fbxPath);
+            int remapped = 0;
+            int currentSlot = 0;
+            foreach (var obj in renderers)
+            {
+                if (obj is Material existingMat)
+                {
+                    if (currentSlot == slot)
+                    {
+                        var id = new AssetImporter.SourceAssetIdentifier(typeof(Material), existingMat.name);
+                        importer.AddRemap(id, material);
+                        remapped++;
+                        break;
+                    }
+                    currentSlot++;
+                }
+            }
+
+            if (remapped == 0)
+            {
+                // Fallback: try using slot index directly on the first embedded material
+                var embedded = new System.Collections.Generic.List<UnityEngine.Object>();
+                foreach (var obj in renderers)
+                {
+                    if (obj is Material m) embedded.Add(m);
+                }
+                if (slot < embedded.Count)
+                {
+                    var mat = embedded[slot] as Material;
+                    var id = new AssetImporter.SourceAssetIdentifier(typeof(Material), mat.name);
+                    importer.AddRemap(id, material);
+                    remapped = 1;
+                }
+            }
+
+            if (remapped == 0)
+                return new ErrorResponse($"Could not find material at slot {slot} in '{fbxPath}'.");
+
+            importer.SaveAndReimport();
+            return new SuccessResponse($"Assigned material '{materialPath}' to slot {slot} of '{fbxPath}'", new
+            {
+                fbxPath,
+                materialPath,
+                slot
+            });
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using MCPForUnity.Editor.Helpers; // For Response class
 using Newtonsoft.Json.Linq;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -102,6 +103,84 @@ namespace MCPForUnity.Editor.Tools.GameObjects
                         return GameObjectMoveRelative.Handle(@params, targetToken, searchMethod);
                     case "look_at":
                         return GameObjectLookAt.Handle(@params, targetToken, searchMethod);
+
+                    case "add_asset_to_scene":
+                    {
+                        string assetPath = @params["assetPath"]?.ToString();
+                        if (string.IsNullOrEmpty(assetPath))
+                            return new ErrorResponse("'assetPath' is required for add_asset_to_scene.");
+
+                        assetPath = AssetPathUtility.SanitizeAssetPath(assetPath);
+                        var asset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(assetPath);
+                        if (asset == null)
+                            return new ErrorResponse($"Asset not found at '{assetPath}'.");
+
+                        GameObject instance = null;
+                        if (asset is GameObject prefab)
+                        {
+                            instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+                        }
+                        else
+                        {
+                            instance = (GameObject)UnityEngine.Object.Instantiate(asset);
+                        }
+
+                        if (instance == null)
+                            return new ErrorResponse($"Could not instantiate asset at '{assetPath}'.");
+
+                        Undo.RegisterCreatedObjectUndo(instance, "Add Asset To Scene");
+
+                        // Apply position if provided
+                        var pos = @params["position"];
+                        if (pos != null)
+                        {
+                            instance.transform.position = new Vector3(
+                                pos[0]?.ToObject<float>() ?? 0f,
+                                pos[1]?.ToObject<float>() ?? 0f,
+                                pos[2]?.ToObject<float>() ?? 0f
+                            );
+                        }
+
+                        // Set parent if provided
+                        string parentTarget = targetToken?.ToString();
+                        if (!string.IsNullOrEmpty(parentTarget))
+                        {
+                            var parentGo = GameObject.Find(parentTarget);
+                            if (parentGo != null)
+                                instance.transform.SetParent(parentGo.transform, true);
+                        }
+
+                        return new SuccessResponse($"Added '{assetPath}' to scene as '{instance.name}'", new
+                        {
+                            instanceId = instance.GetInstanceID(),
+                            name = instance.name,
+                            assetPath
+                        });
+                    }
+
+                    case "set_sibling_index":
+                    {
+                        if (targetToken == null)
+                            return new ErrorResponse("'target' is required for set_sibling_index.");
+
+                        int? siblingIndex = @params["siblingIndex"]?.ToObject<int>();
+                        if (!siblingIndex.HasValue)
+                            return new ErrorResponse("'siblingIndex' is required.");
+
+                        var go = ManageGameObjectCommon.FindObjectInternal(targetToken, searchMethod, null);
+                        if (go == null)
+                            return new ErrorResponse($"GameObject '{targetToken}' not found.");
+
+                        Undo.RecordObject(go.transform, "Set Sibling Index");
+                        go.transform.SetSiblingIndex(siblingIndex.Value);
+
+                        return new SuccessResponse($"Set sibling index of '{go.name}' to {siblingIndex.Value}", new
+                        {
+                            instanceId = go.GetInstanceID(),
+                            name = go.name,
+                            siblingIndex = go.transform.GetSiblingIndex()
+                        });
+                    }
 
                     default:
                         return new ErrorResponse($"Unknown action: '{action}'.");

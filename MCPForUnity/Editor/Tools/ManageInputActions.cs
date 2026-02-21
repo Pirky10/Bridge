@@ -42,8 +42,24 @@ namespace MCPForUnity.Editor.Tools
                         return GetInfo(@params, p);
                     case "assign_to_player_input":
                         return AssignToPlayerInput(@params, p);
+                    case "remove_action_map":
+                        return RemoveActionMap(@params, p);
+                    case "remove_action":
+                        return RemoveAction(@params, p);
+                    case "remove_binding":
+                        return RemoveBinding(@params, p);
+                    case "modify_action":
+                        return ModifyAction(@params, p);
+                    case "modify_binding":
+                        return ModifyBinding(@params, p);
+                    case "add_composite_binding":
+                        return AddCompositeBinding(@params, p);
+                    case "set_interactions":
+                        return SetInteractions(@params, p);
+                    case "set_processors":
+                        return SetProcessors(@params, p);
                     default:
-                        return new ErrorResponse($"Unknown action: {action}. Valid actions: create_asset, add_action_map, add_action, add_binding, get_info, assign_to_player_input");
+                        return new ErrorResponse($"Unknown action: {action}. Valid actions: create_asset, add_action_map, add_action, add_binding, get_info, assign_to_player_input, remove_action_map, remove_action, remove_binding, modify_action, modify_binding, add_composite_binding, set_interactions, set_processors");
                 }
             }
             catch (Exception ex)
@@ -304,6 +320,326 @@ namespace MCPForUnity.Editor.Tools
                 assetPath = path,
                 defaultMap = playerInput.defaultActionMap
             });
+        }
+
+        private static object RemoveActionMap(JObject @params, ToolParams p)
+        {
+            var pathResult = p.GetRequired("path");
+            var pathError = pathResult.GetOrError(out string path);
+            if (pathError != null) return pathError;
+
+            var mapResult = p.GetRequired("map_name");
+            var mapError = mapResult.GetOrError(out string mapName);
+            if (mapError != null) return mapError;
+
+            var asset = LoadAsset(path);
+            if (asset == null) return new ErrorResponse($"Input action asset not found at '{path}'.");
+
+            var map = asset.FindActionMap(mapName);
+            if (map == null) return new ErrorResponse($"Action map '{mapName}' not found.");
+
+            asset.RemoveActionMap(map);
+            SaveAsset(asset, path);
+            return new SuccessResponse($"Removed action map '{mapName}' from '{path}'");
+        }
+
+        private static object RemoveAction(JObject @params, ToolParams p)
+        {
+            var pathResult = p.GetRequired("path");
+            var pathError = pathResult.GetOrError(out string path);
+            if (pathError != null) return pathError;
+
+            var mapResult = p.GetRequired("map_name");
+            var mapError = mapResult.GetOrError(out string mapName);
+            if (mapError != null) return mapError;
+
+            var actionResult = p.GetRequired("action_name");
+            var actionError = actionResult.GetOrError(out string actionName);
+            if (actionError != null) return actionError;
+
+            var asset = LoadAsset(path);
+            if (asset == null) return new ErrorResponse($"Input action asset not found at '{path}'.");
+
+            var map = asset.FindActionMap(mapName);
+            if (map == null) return new ErrorResponse($"Action map '{mapName}' not found.");
+
+            var inputAction = map.FindAction(actionName);
+            if (inputAction == null) return new ErrorResponse($"Action '{actionName}' not found in map '{mapName}'.");
+
+            map.RemoveAction(inputAction);
+            SaveAsset(asset, path);
+            return new SuccessResponse($"Removed action '{actionName}' from map '{mapName}'");
+        }
+
+        private static object RemoveBinding(JObject @params, ToolParams p)
+        {
+            var pathResult = p.GetRequired("path");
+            var pathError = pathResult.GetOrError(out string path);
+            if (pathError != null) return pathError;
+
+            var mapResult = p.GetRequired("map_name");
+            var mapError = mapResult.GetOrError(out string mapName);
+            if (mapError != null) return mapError;
+
+            var actionResult = p.GetRequired("action_name");
+            var actionError = actionResult.GetOrError(out string actionName);
+            if (actionError != null) return actionError;
+
+            int? bindingIndex = p.GetInt("binding_index");
+            if (!bindingIndex.HasValue) return new ErrorResponse("'binding_index' is required.");
+
+            var asset = LoadAsset(path);
+            if (asset == null) return new ErrorResponse($"Input action asset not found at '{path}'.");
+
+            var map = asset.FindActionMap(mapName);
+            if (map == null) return new ErrorResponse($"Action map '{mapName}' not found.");
+
+            var inputAction = map.FindAction(actionName);
+            if (inputAction == null) return new ErrorResponse($"Action '{actionName}' not found in map '{mapName}'.");
+
+            var bindings = inputAction.bindings;
+            if (bindingIndex.Value < 0 || bindingIndex.Value >= bindings.Count)
+                return new ErrorResponse($"Binding index {bindingIndex.Value} out of range (0-{bindings.Count - 1}).");
+
+            inputAction.ChangeBinding(bindingIndex.Value).Erase();
+            SaveAsset(asset, path);
+            return new SuccessResponse($"Removed binding at index {bindingIndex.Value} from action '{actionName}'");
+        }
+
+        private static object ModifyAction(JObject @params, ToolParams p)
+        {
+            var pathResult = p.GetRequired("path");
+            var pathError = pathResult.GetOrError(out string path);
+            if (pathError != null) return pathError;
+
+            var mapResult = p.GetRequired("map_name");
+            var mapError = mapResult.GetOrError(out string mapName);
+            if (mapError != null) return mapError;
+
+            var actionResult = p.GetRequired("action_name");
+            var actionError = actionResult.GetOrError(out string actionName);
+            if (actionError != null) return actionError;
+
+            var asset = LoadAsset(path);
+            if (asset == null) return new ErrorResponse($"Input action asset not found at '{path}'.");
+
+            var map = asset.FindActionMap(mapName);
+            if (map == null) return new ErrorResponse($"Action map '{mapName}' not found.");
+
+            var inputAction = map.FindAction(actionName);
+            if (inputAction == null) return new ErrorResponse($"Action '{actionName}' not found in map '{mapName}'.");
+
+            string newName = p.Get("new_name");
+            if (!string.IsNullOrEmpty(newName))
+                inputAction.Rename(newName);
+
+            string newType = p.Get("new_action_type");
+            if (!string.IsNullOrEmpty(newType))
+            {
+                if (Enum.TryParse<InputActionType>(newType, true, out var actionType))
+                    inputAction.expectedControlType = actionType == InputActionType.Button ? "Button" : null;
+            }
+
+            SaveAsset(asset, path);
+            return new SuccessResponse($"Modified action '{actionName}' in map '{mapName}'");
+        }
+
+        private static object ModifyBinding(JObject @params, ToolParams p)
+        {
+            var pathResult = p.GetRequired("path");
+            var pathError = pathResult.GetOrError(out string path);
+            if (pathError != null) return pathError;
+
+            var mapResult = p.GetRequired("map_name");
+            var mapError = mapResult.GetOrError(out string mapName);
+            if (mapError != null) return mapError;
+
+            var actionResult = p.GetRequired("action_name");
+            var actionError = actionResult.GetOrError(out string actionName);
+            if (actionError != null) return actionError;
+
+            int? bindingIndex = p.GetInt("binding_index");
+            if (!bindingIndex.HasValue) return new ErrorResponse("'binding_index' is required.");
+
+            var asset = LoadAsset(path);
+            if (asset == null) return new ErrorResponse($"Input action asset not found at '{path}'.");
+
+            var map = asset.FindActionMap(mapName);
+            if (map == null) return new ErrorResponse($"Action map '{mapName}' not found.");
+
+            var inputAction = map.FindAction(actionName);
+            if (inputAction == null) return new ErrorResponse($"Action '{actionName}' not found in map '{mapName}'.");
+
+            var bindings = inputAction.bindings;
+            if (bindingIndex.Value < 0 || bindingIndex.Value >= bindings.Count)
+                return new ErrorResponse($"Binding index {bindingIndex.Value} out of range (0-{bindings.Count - 1}).");
+
+            string newPath = p.Get("new_binding_path");
+            if (!string.IsNullOrEmpty(newPath))
+            {
+                inputAction.ChangeBinding(bindingIndex.Value).WithPath(newPath);
+            }
+
+            SaveAsset(asset, path);
+            return new SuccessResponse($"Modified binding at index {bindingIndex.Value} on action '{actionName}'");
+        }
+
+        private static object AddCompositeBinding(JObject @params, ToolParams p)
+        {
+            var pathResult = p.GetRequired("path");
+            var pathError = pathResult.GetOrError(out string path);
+            if (pathError != null) return pathError;
+
+            var mapResult = p.GetRequired("map_name");
+            var mapError = mapResult.GetOrError(out string mapName);
+            if (mapError != null) return mapError;
+
+            var actionResult = p.GetRequired("action_name");
+            var actionError = actionResult.GetOrError(out string actionName);
+            if (actionError != null) return actionError;
+
+            string compositeType = p.Get("composite_type");
+            if (string.IsNullOrEmpty(compositeType))
+                return new ErrorResponse("'composite_type' is required (e.g. '2DVector', '1DAxis').");
+
+            var asset = LoadAsset(path);
+            if (asset == null) return new ErrorResponse($"Input action asset not found at '{path}'.");
+
+            var map = asset.FindActionMap(mapName);
+            if (map == null) return new ErrorResponse($"Action map '{mapName}' not found.");
+
+            var inputAction = map.FindAction(actionName);
+            if (inputAction == null) return new ErrorResponse($"Action '{actionName}' not found in map '{mapName}'.");
+
+            var compositeSyntax = inputAction.AddCompositeBinding(compositeType);
+
+            var parts = @params["composite_parts"] as JObject;
+            if (parts != null)
+            {
+                foreach (var part in parts.Properties())
+                {
+                    compositeSyntax = compositeSyntax.With(part.Name, part.Value.ToString());
+                }
+            }
+
+            SaveAsset(asset, path);
+            return new SuccessResponse($"Added composite binding '{compositeType}' to action '{actionName}'");
+        }
+
+        private static object SetInteractions(JObject @params, ToolParams p)
+        {
+            var pathResult = p.GetRequired("path");
+            var pathError = pathResult.GetOrError(out string path);
+            if (pathError != null) return pathError;
+
+            var mapResult = p.GetRequired("map_name");
+            var mapError = mapResult.GetOrError(out string mapName);
+            if (mapError != null) return mapError;
+
+            var actionResult = p.GetRequired("action_name");
+            var actionError = actionResult.GetOrError(out string actionName);
+            if (actionError != null) return actionError;
+
+            string interactions = p.Get("interactions");
+            if (string.IsNullOrEmpty(interactions))
+                return new ErrorResponse("'interactions' is required.");
+
+            var asset = LoadAsset(path);
+            if (asset == null) return new ErrorResponse($"Input action asset not found at '{path}'.");
+
+            var map = asset.FindActionMap(mapName);
+            if (map == null) return new ErrorResponse($"Action map '{mapName}' not found.");
+
+            var inputAction = map.FindAction(actionName);
+            if (inputAction == null) return new ErrorResponse($"Action '{actionName}' not found in map '{mapName}'.");
+
+            // Set interactions on the action itself via serialized property
+            var serializedAsset = new UnityEditor.SerializedObject(asset);
+            var mapsArray = serializedAsset.FindProperty("m_ActionMaps");
+            for (int i = 0; i < mapsArray.arraySize; i++)
+            {
+                var mapProp = mapsArray.GetArrayElementAtIndex(i);
+                if (mapProp.FindPropertyRelative("m_Name").stringValue == mapName)
+                {
+                    var actionsArray = mapProp.FindPropertyRelative("m_Actions");
+                    for (int j = 0; j < actionsArray.arraySize; j++)
+                    {
+                        var actionProp = actionsArray.GetArrayElementAtIndex(j);
+                        if (actionProp.FindPropertyRelative("m_Name").stringValue == actionName ||
+                            actionProp.FindPropertyRelative("m_Name").stringValue == (inputAction.name ?? actionName))
+                        {
+                            actionProp.FindPropertyRelative("m_Interactions").stringValue = interactions;
+                            serializedAsset.ApplyModifiedPropertiesWithoutUndo();
+                            SaveAsset(asset, path);
+                            return new SuccessResponse($"Set interactions '{interactions}' on action '{actionName}'");
+                        }
+                    }
+                }
+            }
+
+            return new ErrorResponse($"Could not find serialized action '{actionName}' to set interactions.");
+        }
+
+        private static object SetProcessors(JObject @params, ToolParams p)
+        {
+            var pathResult = p.GetRequired("path");
+            var pathError = pathResult.GetOrError(out string path);
+            if (pathError != null) return pathError;
+
+            var mapResult = p.GetRequired("map_name");
+            var mapError = mapResult.GetOrError(out string mapName);
+            if (mapError != null) return mapError;
+
+            var actionResult = p.GetRequired("action_name");
+            var actionError = actionResult.GetOrError(out string actionName);
+            if (actionError != null) return actionError;
+
+            string processors = p.Get("processors");
+            if (string.IsNullOrEmpty(processors))
+                return new ErrorResponse("'processors' is required.");
+
+            var asset = LoadAsset(path);
+            if (asset == null) return new ErrorResponse($"Input action asset not found at '{path}'.");
+
+            var map = asset.FindActionMap(mapName);
+            if (map == null) return new ErrorResponse($"Action map '{mapName}' not found.");
+
+            var inputAction = map.FindAction(actionName);
+            if (inputAction == null) return new ErrorResponse($"Action '{actionName}' not found in map '{mapName}'.");
+
+            // Set processors on the action itself via serialized property
+            var serializedAsset = new UnityEditor.SerializedObject(asset);
+            var mapsArray = serializedAsset.FindProperty("m_ActionMaps");
+            for (int i = 0; i < mapsArray.arraySize; i++)
+            {
+                var mapProp = mapsArray.GetArrayElementAtIndex(i);
+                if (mapProp.FindPropertyRelative("m_Name").stringValue == mapName)
+                {
+                    var actionsArray = mapProp.FindPropertyRelative("m_Actions");
+                    for (int j = 0; j < actionsArray.arraySize; j++)
+                    {
+                        var actionProp = actionsArray.GetArrayElementAtIndex(j);
+                        if (actionProp.FindPropertyRelative("m_Name").stringValue == actionName ||
+                            actionProp.FindPropertyRelative("m_Name").stringValue == (inputAction.name ?? actionName))
+                        {
+                            actionProp.FindPropertyRelative("m_Processors").stringValue = processors;
+                            serializedAsset.ApplyModifiedPropertiesWithoutUndo();
+                            SaveAsset(asset, path);
+                            return new SuccessResponse($"Set processors '{processors}' on action '{actionName}'");
+                        }
+                    }
+                }
+            }
+
+            return new ErrorResponse($"Could not find serialized action '{actionName}' to set processors.");
+        }
+
+        private static void SaveAsset(InputActionAsset asset, string path)
+        {
+            string sanitized = AssetPathUtility.SanitizeAssetPath(path);
+            string json = asset.ToJson();
+            System.IO.File.WriteAllText(sanitized, json);
+            AssetDatabase.ImportAsset(sanitized);
         }
 #endif
     }

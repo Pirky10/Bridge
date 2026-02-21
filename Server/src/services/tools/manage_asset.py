@@ -29,7 +29,7 @@ from services.tools.preflight import preflight
 )
 async def manage_asset(
     ctx: Context,
-    action: Annotated[Literal["import", "create", "modify", "delete", "duplicate", "move", "rename", "search", "get_info", "create_folder", "get_components"], "Perform CRUD operations on assets."],
+    action: Annotated[Literal["import", "create", "modify", "delete", "duplicate", "move", "rename", "search", "get_info", "create_folder", "get_components", "export_package"], "Perform CRUD operations on assets."],
     path: Annotated[str, "Asset path (e.g., 'Materials/MyMaterial.mat') or search scope (e.g., 'Assets')."],
     asset_type: Annotated[str,
                           "Asset type (e.g., 'Material', 'Folder') - required for 'create'. Note: For ScriptableObjects, use manage_scriptable_object."] | None = None,
@@ -50,6 +50,8 @@ async def manage_asset(
                          "Page size for pagination. Recommended: 25 (smaller for LLM-friendly responses)."] | None = None,
     page_number: Annotated[int | float | str,
                            "Page number for pagination (1-based)."] | None = None,
+    export_path: Annotated[str, "Output path for export_package (e.g. '/tmp/MyPackage.unitypackage')"] | None = None,
+    include_dependencies: Annotated[bool, "Include dependencies when exporting package (default: true)"] | None = None,
 ) -> dict[str, Any]:
     unity_instance = await get_unity_instance_from_context(ctx)
 
@@ -104,7 +106,9 @@ async def manage_asset(
         "filterType": filter_type,
         "filterDateAfter": filter_date_after,
         "pageSize": page_size,
-        "pageNumber": page_number
+        "pageNumber": page_number,
+        "exportPath": export_path,
+        "includeDependencies": include_dependencies
     }
 
     # Remove None values to avoid sending unnecessary nulls
