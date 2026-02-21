@@ -48,7 +48,7 @@ namespace MCPForUnity.Editor.Tools.GameObjects
                 else if (!string.IsNullOrEmpty(searchTerm) && searchTerm.Contains('/'))
                     searchMethod = "by_path";
                 else
-                    searchMethod = "by_name";
+                    searchMethod = "by_id_or_name_or_path";
             }
 
             GameObject rootSearchObject = null;
