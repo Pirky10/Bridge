@@ -144,8 +144,7 @@ class GetTestJobResponse(MCPResponse):
 
 
 @mcp_for_unity_tool(
-    group="testing",
-    description="Starts a Unity test run asynchronously and returns a job_id immediately. Poll with get_test_job for progress.",
+    description="Starts a Unity test run asynchronously and returns a job_id immediately. Use action='poll' with a job_id to check progress. Actions: start (default), poll.",
     annotations=ToolAnnotations(
         title="Run Tests",
         destructiveHint=True,
@@ -153,22 +152,35 @@ class GetTestJobResponse(MCPResponse):
 )
 async def run_tests(
     ctx: Context,
+    action: Annotated[Literal["start", "poll"],
+                      "'start' to begin a test run, 'poll' to check progress of a running job"] = "start",
     mode: Annotated[Literal["EditMode", "PlayMode"],
-                    "Unity test mode to run"] = "EditMode",
+                    "Unity test mode to run (used with action='start')"] = "EditMode",
     test_names: Annotated[list[str] | str,
-                          "Full names of specific tests to run"] | None = None,
+                          "Full names of specific tests to run (used with action='start')"] | None = None,
     group_names: Annotated[list[str] | str,
-                           "Same as test_names, except it allows for Regex"] | None = None,
+                           "Same as test_names, except it allows for Regex (used with action='start')"] | None = None,
     category_names: Annotated[list[str] | str,
-                              "NUnit category names to filter by"] | None = None,
+                              "NUnit category names to filter by (used with action='start')"] | None = None,
     assembly_names: Annotated[list[str] | str,
-                              "Assembly names to filter tests by"] | None = None,
+                              "Assembly names to filter tests by (used with action='start')"] | None = None,
+    job_id: Annotated[str, "Job id returned by a previous run_tests start action (required for action='poll')"] | None = None,
     include_failed_tests: Annotated[bool,
                                     "Include details for failed/skipped tests only (default: false)"] = False,
     include_details: Annotated[bool,
                                "Include details for all tests (default: false)"] = False,
-) -> RunTestsStartResponse | MCPResponse:
-    unity_instance = await get_unity_instance_from_context(ctx)
+    wait_timeout: Annotated[int | None,
+                            "(action='poll' only) Wait up to this many seconds for tests to complete before returning. "
+                            "Reduces polling frequency and avoids client-side loop detection. "
+                            "Recommended: 30-60 seconds. Returns immediately if tests complete sooner."] = None,
+) -> RunTestsStartResponse | GetTestJobResponse | MCPResponse:
+    if action == "poll":
+        if not job_id:
+            return MCPResponse(success=False, error="job_id is required for action='poll'")
+        return await _poll_test_job(ctx, job_id, include_failed_tests, include_details, wait_timeout)
+
+    # action == "start"
+    unity_instance = get_unity_instance_from_context(ctx)
 
     gate = await preflight(ctx, requires_no_tests=True, wait_for_no_compile=True, refresh_if_dirty=True)
     if isinstance(gate, MCPResponse):
@@ -212,15 +224,7 @@ async def run_tests(
     return MCPResponse(success=False, error=str(response))
 
 
-@mcp_for_unity_tool(
-    group="testing",
-    description="Polls an async Unity test job by job_id.",
-    annotations=ToolAnnotations(
-        title="Get Test Job",
-        readOnlyHint=True,
-    ),
-)
-async def get_test_job(
+async def _poll_test_job(
     ctx: Context,
     job_id: Annotated[str, "Job id returned by run_tests"],
     include_failed_tests: Annotated[bool,
@@ -232,7 +236,7 @@ async def get_test_job(
                             "Reduces polling frequency and avoids client-side loop detection. "
                             "Recommended: 30-60 seconds. Returns immediately if tests complete sooner."] = None,
 ) -> GetTestJobResponse | MCPResponse:
-    unity_instance = await get_unity_instance_from_context(ctx)
+    unity_instance = get_unity_instance_from_context(ctx)
 
     params: dict[str, Any] = {"job_id": job_id}
     if include_failed_tests:

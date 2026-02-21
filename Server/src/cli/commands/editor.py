@@ -365,7 +365,8 @@ def poll_test(job_id: str, wait: int, details: bool, failed_only: bool):
     if failed_only:
         params["include_failed_tests"] = True
 
-    result = run_command("get_test_job", params, config)
+    params["action"] = "poll"
+    result = run_command("run_tests", params, config)
     click.echo(format_output(result, config.format))
 
     if isinstance(result, dict) and result.get("success"):

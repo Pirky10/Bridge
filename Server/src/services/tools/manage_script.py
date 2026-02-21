@@ -100,7 +100,7 @@ async def apply_text_edits(
     options: Annotated[dict[str, Any],
                        "Optional options, used to pass additional options to the script editor"] | None = None,
 ) -> dict[str, Any]:
-    unity_instance = await get_unity_instance_from_context(ctx)
+    unity_instance = get_unity_instance_from_context(ctx)
     await ctx.info(
         f"Processing apply_text_edits: {uri} (unity_instance={unity_instance or 'default'})")
     name, directory = _split_uri(uri)
@@ -396,7 +396,7 @@ async def create_script(
     script_type: Annotated[str, "Script type (e.g., 'C#')"] | None = None,
     namespace: Annotated[str, "Namespace for the script"] | None = None,
 ) -> dict[str, Any]:
-    unity_instance = await get_unity_instance_from_context(ctx)
+    unity_instance = get_unity_instance_from_context(ctx)
     await ctx.info(
         f"Processing create_script: {path} (unity_instance={unity_instance or 'default'})")
     name = os.path.splitext(os.path.basename(path))[0]
@@ -452,7 +452,7 @@ async def delete_script(
     uri: Annotated[str, "URI of the script to delete under Assets/ directory, mcpforunity://path/Assets/... or file://... or Assets/..."],
 ) -> dict[str, Any]:
     """Delete a C# script by URI."""
-    unity_instance = await get_unity_instance_from_context(ctx)
+    unity_instance = get_unity_instance_from_context(ctx)
     await ctx.info(
         f"Processing delete_script: {uri} (unity_instance={unity_instance or 'default'})")
     name, directory = _split_uri(uri)
@@ -490,7 +490,7 @@ async def validate_script(
     include_diagnostics: Annotated[bool,
                                    "Include full diagnostics and summary"] = False,
 ) -> dict[str, Any]:
-    unity_instance = await get_unity_instance_from_context(ctx)
+    unity_instance = get_unity_instance_from_context(ctx)
     await ctx.info(
         f"Processing validate_script: {uri} (unity_instance={unity_instance or 'default'})")
     name, directory = _split_uri(uri)
@@ -531,7 +531,7 @@ async def validate_script(
 )
 async def manage_script(
     ctx: Context,
-    action: Annotated[Literal['create', 'read', 'delete'], "Perform CRUD operations on C# scripts."],
+    action: Annotated[Literal['create', 'read', 'delete', 'capabilities'], "Perform CRUD operations on C# scripts, or query capabilities."],
     name: Annotated[str, "Script name (no .cs extension)", "Name of the script to create"],
     path: Annotated[str, "Asset path (default: 'Assets/')", "Path under Assets/ to create the script at, e.g., 'Assets/Scripts/My.cs'"],
     contents: Annotated[str, "Contents of the script to create",
@@ -540,9 +540,27 @@ async def manage_script(
                            "Type hint (e.g., 'MonoBehaviour')"] | None = None,
     namespace: Annotated[str, "Namespace for the script"] | None = None,
 ) -> dict[str, Any]:
-    unity_instance = await get_unity_instance_from_context(ctx)
+    unity_instance = get_unity_instance_from_context(ctx)
     await ctx.info(
         f"Processing manage_script: {action} (unity_instance={unity_instance or 'default'})")
+
+    # Handle capabilities action locally (no Unity roundtrip needed)
+    if action == "capabilities":
+        ops = [
+            "replace_class", "delete_class", "replace_method", "delete_method",
+            "insert_method", "anchor_insert", "anchor_delete", "anchor_replace"
+        ]
+        text_ops = ["replace_range", "regex_replace", "prepend", "append"]
+        max_edit_payload_bytes = 256 * 1024
+        guards = {"using_guard": True}
+        extras = {"get_sha": True}
+        return {"success": True, "data": {
+            "ops": ops,
+            "text_ops": text_ops,
+            "max_edit_payload_bytes": max_edit_payload_bytes,
+            "guards": guards,
+            "extras": extras,
+        }}
     try:
         # Prepare parameters for Unity
         params = {
@@ -612,44 +630,7 @@ async def manage_script(
         }
 
 
-@mcp_for_unity_tool(
-    unity_target=None,
-    group=None,
-    description=(
-        """Get manage_script capabilities (supported ops, limits, and guards).
-    Returns:
-        - ops: list of supported structured ops
-        - text_ops: list of supported text ops
-        - max_edit_payload_bytes: server edit payload cap
-        - guards: header/using guard enabled flag"""
-    ),
-    annotations=ToolAnnotations(
-        title="Manage Script Capabilities",
-        readOnlyHint=True,
-    ),
-)
-async def manage_script_capabilities(ctx: Context) -> dict[str, Any]:
-    await ctx.info("Processing manage_script_capabilities")
-    try:
-        # Keep in sync with server/Editor ManageScript implementation
-        ops = [
-            "replace_class", "delete_class", "replace_method", "delete_method",
-            "insert_method", "anchor_insert", "anchor_delete", "anchor_replace"
-        ]
-        text_ops = ["replace_range", "regex_replace", "prepend", "append"]
-        # Match ManageScript.MaxEditPayloadBytes if exposed; hardcode a sensible default fallback
-        max_edit_payload_bytes = 256 * 1024
-        guards = {"using_guard": True}
-        extras = {"get_sha": True}
-        return {"success": True, "data": {
-            "ops": ops,
-            "text_ops": text_ops,
-            "max_edit_payload_bytes": max_edit_payload_bytes,
-            "guards": guards,
-            "extras": extras,
-        }}
-    except Exception as e:
-        return {"success": False, "error": f"capabilities error: {e}"}
+
 
 
 @mcp_for_unity_tool(
@@ -664,7 +645,7 @@ async def get_sha(
     ctx: Context,
     uri: Annotated[str, "URI of the script to edit under Assets/ directory, mcpforunity://path/Assets/... or file://... or Assets/..."],
 ) -> dict[str, Any]:
-    unity_instance = await get_unity_instance_from_context(ctx)
+    unity_instance = get_unity_instance_from_context(ctx)
     await ctx.info(
         f"Processing get_sha: {uri} (unity_instance={unity_instance or 'default'})")
     try:
