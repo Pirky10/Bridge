@@ -359,6 +359,20 @@ Console Monitoring:
 - Check `read_console` regularly to catch errors, warnings, and compilation status
 - Filter by log type (Error, Warning, Log) to focus on specific issues
 
+Verification & Self-Checking (IMPORTANT — always do this):
+- After making visual changes (creating objects, materials, lighting, UI, effects, etc.):
+  1. Enter play mode with `manage_editor(action='play')`
+  2. Take a screenshot with `capture_screenshot(action='game_view')`
+  3. LOOK at the screenshot carefully — does the result match what the user requested?
+  4. If NOT correct, stop play mode, make fixes, and repeat steps 1-3 until it looks right
+  5. Stop play mode with `manage_editor(action='stop')` when done
+- After creating or modifying scripts:
+  1. Check `read_console` immediately for compilation errors
+  2. If there are errors, fix them before proceeding
+  3. Only after successful compilation can new components/types be used
+- After ANY changes, always check `read_console` for errors, warnings, and compilation status — fix them before moving on
+- Do NOT tell the user "it's done" until you have verified the result visually (screenshot) and checked the console for errors
+
 Menu Items:
 - Use `execute_menu_item` when you have read the menu items resource
 - This lets you interact with Unity's menu system and third-party tools
