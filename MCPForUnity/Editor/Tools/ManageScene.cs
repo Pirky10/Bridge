@@ -144,6 +144,12 @@ namespace MCPForUnity.Editor.Tools
                 {
                     relativeDir = relativeDir.Substring("Assets/".Length).TrimStart('/');
                 }
+                // If path points to a .unity file, extract just the directory portion
+                if (relativeDir.EndsWith(".unity", StringComparison.OrdinalIgnoreCase))
+                {
+                    int lastSlash = relativeDir.LastIndexOf('/');
+                    relativeDir = lastSlash >= 0 ? relativeDir.Substring(0, lastSlash) : string.Empty;
+                }
             }
 
             // Apply default *after* sanitizing, using the original path variable for the check
@@ -197,12 +203,20 @@ namespace MCPForUnity.Editor.Tools
                     // Loading can be done by path/name or build index
                     if (!string.IsNullOrEmpty(relativePath))
                         return LoadScene(relativePath);
-                    else if (buildIndex.HasValue)
+                    // If path was provided as a full .unity asset path but name was omitted,
+                    // reconstruct the asset-relative path directly from the original path.
+                    if (!string.IsNullOrEmpty(path) && path.EndsWith(".unity", StringComparison.OrdinalIgnoreCase))
+                    {
+                        string assetPath = AssetPathUtility.NormalizeSeparators(path).Trim('/');
+                        if (!assetPath.StartsWith("Assets/", StringComparison.OrdinalIgnoreCase))
+                            assetPath = "Assets/" + assetPath;
+                        return LoadScene(assetPath);
+                    }
+                    if (buildIndex.HasValue)
                         return LoadScene(buildIndex.Value);
-                    else
-                        return new ErrorResponse(
-                            "Either 'name'/'path' or 'buildIndex' must be provided for 'load' action."
-                        );
+                    return new ErrorResponse(
+                        "Either 'name'/'path' or 'buildIndex' must be provided for 'load' action."
+                    );
                 case "save":
                     // Save current scene, optionally to a new path
                     return SaveScene(fullPath, relativePath);
