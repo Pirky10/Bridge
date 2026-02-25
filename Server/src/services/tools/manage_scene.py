@@ -15,7 +15,7 @@ from services.tools.preflight import preflight
     description=(
         "Performs CRUD operations on Unity scenes. "
         "Read-only actions: get_hierarchy, get_active, get_build_settings, scene_view_frame. "
-        "Modifying actions: create, load, save. "
+        "Modifying actions: create (includes default Camera + Directional Light), load, save. "
         "For screenshots, use manage_camera (screenshot, screenshot_multiview actions)."
     ),
     annotations=ToolAnnotations(

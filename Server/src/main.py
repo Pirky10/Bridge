@@ -331,10 +331,31 @@ execute_code Best Practices:
 - NEVER use execute_code with System.IO.File to create/modify/delete script files — use the script tools above instead
 - Keep execute_code snippets short and focused on a single task
 
-Scene Setup:
-- Always include a Camera and main Light (Directional Light) in new scenes
+Scene Setup (CRITICAL — do this after EVERY new scene creation):
+- When you create a new scene with `manage_scene(action='create')`, the scene comes with a Main Camera and Directional Light by default
+- If the newly created scene does not have a Main Camera and Directional Light, create them using `manage_gameobject(action='create')`
+- IMMEDIATELY after creating a new scene, you MUST also set up these essentials:
+  1. Verify the Camera and Directional Light exist (check hierarchy)
+  2. Add a Global Volume for post-processing (using `manage_post_processing(action='add_volume', ...)`)
+  3. Create organizer parents (e.g., "--- ENVIRONMENT ---", "--- LIGHTING ---", "--- SETUP ---") and parent the default objects under them
+  4. Configure the Directional Light rotation, intensity, and color for the scene's mood
+  5. Position the Camera appropriately for the scene
+- NEVER leave a newly created scene with just raw default objects — always organize and configure them
 - Create prefabs with `manage_asset` for reusable GameObjects
 - Use `manage_scene` to load, save, and query scene information
+
+Creating Visible 3D Objects (CRITICAL):
+- When creating objects that need to be VISIBLE (walls, floors, props, obstacles, etc.), you MUST specify `primitive_type` in `manage_gameobject(action='create')`:
+  - `primitive_type='Cube'` → for walls, floors, ceilings, boxes, platforms
+  - `primitive_type='Sphere'` → for balls, orbs, rounded objects
+  - `primitive_type='Plane'` → for flat ground surfaces
+  - `primitive_type='Cylinder'` → for pillars, pipes, poles
+  - `primitive_type='Capsule'` → for character placeholders
+  - `primitive_type='Quad'` → for flat display surfaces
+- WITHOUT `primitive_type`, you get an EMPTY GameObject (just a Transform) — invisible, no mesh, no renderer!
+- Example: `manage_gameobject(action='create', name='Floor', primitive_type='Cube', position=[0,0,0], scale=[20,1,20])`
+- Only omit `primitive_type` when creating organizer/parent objects (e.g., "--- ENVIRONMENT ---") that are meant to be empty containers
+- After creating visible objects, always verify they have MeshFilter and MeshRenderer components in the response data
 
 Component Placement:
 - Think carefully about WHICH GameObject a component should be added to based on its purpose:
@@ -355,6 +376,11 @@ Path Conventions:
 - Unless specified otherwise, all paths are relative to the project's `Assets/` folder
 - Use forward slashes (/) in paths for cross-platform compatibility
 
+Color Format (CRITICAL):
+- ALL color parameters across ALL tools must be [R, G, B] or [R, G, B, A] float arrays with values 0.0-1.0
+- NEVER use CSS hex strings like '#FF0000' or '#050505' — they will cause validation errors!
+- Examples: red = [1.0, 0.0, 0.0], dark gray = [0.05, 0.05, 0.05], warm white = [1.0, 0.9, 0.8, 1.0]
+
 Console Monitoring:
 - Check `read_console` regularly to catch errors, warnings, and compilation status
 - Filter by log type (Error, Warning, Log) to focus on specific issues
@@ -364,8 +390,15 @@ Verification & Self-Checking (IMPORTANT — always do this):
   1. Enter play mode with `manage_editor(action='play')`
   2. Take a screenshot with `capture_screenshot(action='game_view')`
   3. LOOK at the screenshot carefully — does the result match what the user requested?
-  4. If NOT correct, stop play mode, make fixes, and repeat steps 1-3 until it looks right
-  5. Stop play mode with `manage_editor(action='stop')` when done
+  4. If the screenshot looks empty/wrong (e.g., just sky, missing objects, no visible geometry):
+     - Check: did you forget `primitive_type` when creating objects? Empty GameObjects are invisible!
+     - Check: did created objects return `MeshFilter`/`MeshRenderer` in their componentNames? If not, they have no geometry.
+     - Fix by re-creating objects WITH `primitive_type` or adding mesh components
+  5. If NOT correct, stop play mode, make fixes, and repeat steps 1-3 until it looks right
+  6. Stop play mode with `manage_editor(action='stop')` when done
+- After creating GameObjects that should be visible:
+  - Verify the response data contains `MeshFilter` and `MeshRenderer` in `componentNames`
+  - If it only shows `Transform`, the object is EMPTY/INVISIBLE — you forgot `primitive_type`!
 - After creating or modifying scripts:
   1. Check `read_console` immediately for compilation errors
   2. If there are errors, fix them before proceeding

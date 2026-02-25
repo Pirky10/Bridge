@@ -273,9 +273,10 @@ namespace MCPForUnity.Editor.Tools
 
             try
             {
-                // Create a new empty scene
+                // Create a new scene with default objects (Camera + Directional Light),
+                // matching Unity's default "File > New Scene" behavior
                 Scene newScene = EditorSceneManager.NewScene(
-                    NewSceneSetup.EmptyScene,
+                    NewSceneSetup.DefaultGameObjects,
                     NewSceneMode.Single
                 );
                 // Save it to the specified path
