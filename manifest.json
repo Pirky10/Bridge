@@ -4,16 +4,16 @@
   "version": "1.0.2",
   "description": "AI-powered Unity Editor automation via MCP - manage GameObjects, scripts, materials, scenes, prefabs, VFX, and run tests",
   "author": {
-    "name": "Coplay",
-    "url": "https://www.coplay.dev"
+    "name": "Bridge AI",
+    "url": "https://github.com/Pirky10/Bridge"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/CoplayDev/unity-mcp"
+    "url": "https://github.com/Pirky10/Bridge"
   },
-  "homepage": "https://www.coplay.dev",
-  "documentation": "https://github.com/CoplayDev/unity-mcp#readme",
-  "support": "https://github.com/CoplayDev/unity-mcp/issues",
+  "homepage": "https://github.com/Pirky10/Bridge",
+  "documentation": "https://github.com/Pirky10/Bridge#readme",
+  "support": "https://github.com/Pirky10/Bridge/issues",
   "icon": "coplay-logo.png",
   "server": {
     "type": "python",
@@ -22,7 +22,7 @@
       "command": "uvx",
       "args": [
         "--from",
-        "mcpforunityserver",
+        "bridge-ai-unity-mcp",
         "mcp-for-unity"
       ],
       "env": {}

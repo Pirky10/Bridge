@@ -20,8 +20,8 @@ namespace MCPForUnity.Editor.Services
         private const string CachedBetaVersionKey = EditorPrefKeys.LatestKnownVersion + ".beta";
         private const string LastAssetStoreCheckDateKey = EditorPrefKeys.LastAssetStoreUpdateCheck;
         private const string CachedAssetStoreVersionKey = EditorPrefKeys.LatestKnownAssetStoreVersion;
-        private const string MainPackageJsonUrl = "https://raw.githubusercontent.com/CoplayDev/unity-mcp/main/MCPForUnity/package.json";
-        private const string BetaPackageJsonUrl = "https://raw.githubusercontent.com/CoplayDev/unity-mcp/beta/MCPForUnity/package.json";
+        private const string MainPackageJsonUrl = "https://raw.githubusercontent.com/Pirky10/Bridge/main/MCPForUnity/package.json";
+        private const string BetaPackageJsonUrl = "https://raw.githubusercontent.com/Pirky10/Bridge/beta/MCPForUnity/package.json";
         private const string AssetStoreVersionUrl = "https://gqoqjkkptwfbkwyssmnj.supabase.co/storage/v1/object/public/coplay-images/assetstoreversion.json";
 
         /// <inheritdoc/>
@@ -257,7 +257,7 @@ namespace MCPForUnity.Editor.Services
             try
             {
                 // GitHub API endpoint (Option 1 - has rate limits):
-                // https://api.github.com/repos/CoplayDev/unity-mcp/releases/latest
+                // https://api.github.com/repos/Pirky10/Bridge/releases/latest
                 //
                 // We use Option 2 (package.json directly) because:
                 // - No API rate limits (GitHub serves raw files freely)
