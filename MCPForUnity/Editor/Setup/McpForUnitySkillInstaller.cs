@@ -37,7 +37,7 @@ namespace MCPForUnity.Editor.Setup
         private void OnEnable()
         {
             var userHome = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            _repoUrl = EditorPrefs.GetString(RepoUrlKey, "https://github.com/Pirky10/Bridge");
+            _repoUrl = EditorPrefs.GetString(RepoUrlKey, "https://github.com/Pirky10/Bridge-AI-Skills");
             _targetBranch = EditorPrefs.GetString(BranchKey, "beta");
             if (!BranchOptions.Contains(_targetBranch))
             {
