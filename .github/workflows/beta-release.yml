@@ -5,12 +5,13 @@ concurrency:
   cancel-in-progress: true
 
 on:
-  push:
-    branches:
-      - beta
-    paths:
-      - "Server/**"
-      - "MCPForUnity/**"
+  workflow_dispatch:  # Manual trigger only — PyPI trusted publisher is configured for upstream repo
+  # push:
+  #   branches:
+  #     - beta
+  #   paths:
+  #     - "Server/**"
+  #     - "MCPForUnity/**"
 
 jobs:
   update_unity_beta_version:
