@@ -1,11 +1,11 @@
 {
-  "name": "com.coplaydev.unity-mcp",
+  "name": "com.bridgeai.unity-mcp",
   "version": "1.0.3-beta.1",
   "displayName": "MCP for Unity",
-  "description": "A bridge that connects AI assistants to Unity via the MCP (Model Context Protocol). Allows AI clients like Claude Code, Cursor, and VSCode to directly control your Unity Editor for enhanced development workflows.\n\nFeatures automated setup wizard, cross-platform support, and seamless integration with popular AI development tools.\n\nJoin Our Discord: https://discord.gg/y4p8KfzrN4",
+  "description": "A bridge that connects AI assistants to Unity via the MCP (Model Context Protocol). Allows AI clients like Claude Code, Cursor, and VSCode to directly control your Unity Editor for enhanced development workflows.\n\nFeatures automated setup wizard, cross-platform support, and seamless integration with popular AI development tools.",
   "unity": "2021.3",
-  "documentationUrl": "https://github.com/CoplayDev/unity-mcp",
-  "licensesUrl": "https://github.com/CoplayDev/unity-mcp/blob/main/LICENSE",
+  "documentationUrl": "https://github.com/Pirky10/Bridge",
+  "licensesUrl": "https://github.com/Pirky10/Bridge/blob/main/LICENSE",
   "dependencies": {
     "com.unity.nuget.newtonsoft-json": "3.0.2",
     "com.unity.test-framework": "1.1.31"
@@ -20,8 +20,7 @@
     "mcp-client"
   ],
   "author": {
-    "name": "Coplay",
-    "email": "support@coplay.dev",
-    "url": "https://coplay.dev"
+    "name": "Bridge AI",
+    "url": "https://github.com/Pirky10/Bridge"
   }
 }
