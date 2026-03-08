@@ -27,6 +27,10 @@ TOOL_GROUPS: dict[str, str] = {
 
 DEFAULT_ENABLED_GROUPS: set[str] = {"core"}
 
+# Groups hidden at startup in stdio mode to stay under client tool limits.
+# Their tools remain callable via batch_execute (routed directly to Unity).
+STDIO_DISABLED_GROUPS: set[str] = {"testing", "scripting_ext"}
+
 
 def mcp_for_unity_tool(
     name: str | None = None,

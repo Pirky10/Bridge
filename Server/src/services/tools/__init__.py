@@ -9,7 +9,7 @@ from fastmcp import Context, FastMCP
 from core.telemetry_decorator import telemetry_tool
 from core.logging_decorator import log_execution
 from utils.module_discovery import discover_modules
-from services.registry import get_registered_tools, TOOL_GROUPS, DEFAULT_ENABLED_GROUPS
+from services.registry import get_registered_tools, TOOL_GROUPS, DEFAULT_ENABLED_GROUPS, STDIO_DISABLED_GROUPS
 
 logger = logging.getLogger("mcp-for-unity-server")
 
@@ -88,10 +88,24 @@ def register_all_tools(mcp: FastMCP, *, project_scoped_tools: bool = True):
             "Use manage_tools to activate more."
         )
     else:
-        logger.info(
+        # Stdio mode: disable a small set of groups to stay under client tool
+        # limits (e.g. Antigravity's 100-tool cap).  Hidden tools remain callable
+        # via batch_execute which routes directly to Unity.
+        if STDIO_DISABLED_GROUPS:
+            for group_name in sorted(STDIO_DISABLED_GROUPS):
+                tag = f"group:{group_name}"
+                mcp.disable(tags={tag}, components={"tool"})
+                logger.debug(f"Disabled tool group at startup (stdio): {group_name}")
+            logger.info(
+                f"Stdio transport: disabled groups at startup: "
+                f"{', '.join(sorted(STDIO_DISABLED_GROUPS))}. "
+                "Use manage_tools to activate them if needed."
+            )
+        else:
+            logger.info(
             "Stdio transport: all tool groups enabled at startup. "
             "Will sync with Unity's tool states after connecting."
-        )
+            )
 
 
 async def sync_tool_visibility_from_unity(
