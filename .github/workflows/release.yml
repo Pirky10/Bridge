@@ -440,37 +440,12 @@ jobs:
           gh pr view "$PR_NUMBER" --json state,mergeStateStatus,isDraft -q '{state: .state, mergeStateStatus: .mergeStateStatus, isDraft: .isDraft}'
           exit 1
 
-  publish_docker:
-    name: Publish Docker image
-    needs:
-      - bump
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - name: Check out the repo
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ needs.bump.outputs.tag }}
-          fetch-depth: 0
-
-      - name: Build and push Docker image
-        uses: ./.github/actions/publish-docker
-        with:
-          docker_username: ${{ secrets.DOCKER_USERNAME }}
-          docker_password: ${{ secrets.DOCKER_PASSWORD }}
-          image: ${{ secrets.DOCKER_USERNAME }}/mcp-for-unity-server
-          version: ${{ needs.bump.outputs.new_version }}
-          include_branch_tags: "false"
-          context: .
-          dockerfile: Server/Dockerfile
-          platforms: linux/amd64
-
   publish_pypi:
     name: Publish Python distribution to PyPI
     needs:
       - bump
     runs-on: ubuntu-latest
+    if: github.repository == 'CoplayDev/unity-mcp' # Only run on official repo to prevent permission errors
     environment:
       name: pypi
       url: https://pypi.org/p/mcpforunityserver
