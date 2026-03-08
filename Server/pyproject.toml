@@ -1,5 +1,5 @@
 [project]
-name = "mcpforunityserver"
+name = "bridge-ai-unity-mcp"
 version = "10.0.0"
 description = "MCP for Unity Server: A Unity package for Unity Editor integration via the Model Context Protocol (MCP)."
 readme = "README.md"
