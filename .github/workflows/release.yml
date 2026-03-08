@@ -445,7 +445,6 @@ jobs:
     needs:
       - bump
     runs-on: ubuntu-latest
-    if: github.repository == 'CoplayDev/unity-mcp' # Only run on official repo to prevent permission errors
     environment:
       name: pypi
       url: https://pypi.org/p/mcpforunityserver
