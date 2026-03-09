@@ -905,6 +905,12 @@ def send_command_with_retry(
     return response
 
 
+# Limit concurrent commands to Unity to prevent socket contention and timeouts
+# when AI clients fire many parallel tool calls. Extra commands wait in line.
+import asyncio as _asyncio
+_command_semaphore = _asyncio.Semaphore(3)
+
+
 async def async_send_command_with_retry(
     command_type: str,
     params: dict[str, Any],
@@ -916,6 +922,10 @@ async def async_send_command_with_retry(
     retry_on_reload: bool = True
 ) -> dict[str, Any] | MCPResponse:
     """Async wrapper that runs the blocking retry helper in a thread pool.
+
+    Uses a semaphore to limit concurrency — Unity processes commands
+    sequentially, so flooding it causes timeouts. Extra callers wait
+    in an async queue rather than timing out.
 
     Args:
         command_type: The command type to send
@@ -933,11 +943,12 @@ async def async_send_command_with_retry(
         import asyncio  # local import to avoid mandatory asyncio dependency for sync callers
         if loop is None:
             loop = asyncio.get_running_loop()
-        return await loop.run_in_executor(
-            None,
-            lambda: send_command_with_retry(
-                command_type, params, instance_id=instance_id, max_retries=max_retries,
-                retry_ms=retry_ms, retry_on_reload=retry_on_reload),
-        )
+        async with _command_semaphore:
+            return await loop.run_in_executor(
+                None,
+                lambda: send_command_with_retry(
+                    command_type, params, instance_id=instance_id, max_retries=max_retries,
+                    retry_ms=retry_ms, retry_on_reload=retry_on_reload),
+            )
     except Exception as e:
         return MCPResponse(success=False, error=str(e))
