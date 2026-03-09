@@ -8,13 +8,13 @@ from transport.unity_transport import send_with_unity_instance
 from transport.legacy.unity_connection import async_send_command_with_retry
 
 @mcp_for_unity_tool(
-    description="Manages URP/HDRP post-processing Volumes and overrides (Bloom, ColorAdjustments, Vignette, DepthOfField, MotionBlur, etc.). Actions: add_volume, add_override, configure_override, remove_override, set_volume_properties, get_info.",
+    description="Manages URP/HDRP post-processing Volumes and overrides (Bloom, ColorAdjustments, Vignette, DepthOfField, MotionBlur, etc.). Actions: add_volume, add_override, configure_override, remove_override, set_volume_properties, get_info. IMPORTANT: Most actions require 'target' — the name of a GameObject that has a Volume component attached. Use action='get_info' with no target first to list all existing Volumes in the scene.",
     annotations=ToolAnnotations(title="Manage Post Processing", destructiveHint=True),
 )
 async def manage_post_processing(
     ctx: Context,
     action: Annotated[Literal["add_volume", "add_override", "configure_override", "remove_override", "set_volume_properties", "get_info"], "Action"],
-    target: Annotated[str, "Target Volume GameObject"] | None = None,
+    target: Annotated[str, "Name of a GameObject with a Volume component attached. Use get_info with no target to discover available Volumes."] | None = None,
     name: Annotated[str, "Name for new Volume"] | None = None,
     is_global: Annotated[bool, "Global volume"] | None = None,
     priority: Annotated[float, "Volume priority"] | None = None,
