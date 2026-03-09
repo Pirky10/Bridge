@@ -80,7 +80,7 @@ async def manage_particle_system(
     clear: Annotated[bool, "Clear particles on stop"] | None = None,
 
 ) -> dict[str, Any]:
-    unity_instance = get_unity_instance_from_context(ctx)
+    unity_instance = await get_unity_instance_from_context(ctx)
 
     params_dict = {
         "action": action, "target": target, "name": name, "position": position,

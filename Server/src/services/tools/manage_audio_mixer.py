@@ -46,7 +46,7 @@ async def manage_audio_mixer(
     auto_expose_volume: Annotated[bool, "Auto-expose volume when adding group (default: true)"] | None = None,
 
 ) -> dict[str, Any]:
-    unity_instance = get_unity_instance_from_context(ctx)
+    unity_instance = await get_unity_instance_from_context(ctx)
 
     params_dict = {
         "action": action, "mixer_path": mixer_path, "path": path,

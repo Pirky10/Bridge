@@ -32,7 +32,7 @@ async def suggest_architecture(
     current_issues: Annotated[str, "Current architectural issues or pain points"] | None = None,
     team_size: Annotated[str, "Team size: solo, small (2-5), medium (5-15), large (15+)"] | None = None,
 ) -> dict[str, Any]:
-    unity_instance = get_unity_instance_from_context(ctx)
+    unity_instance = await get_unity_instance_from_context(ctx)
 
     # Gather project context
     context_data = {}

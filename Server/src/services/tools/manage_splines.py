@@ -24,7 +24,7 @@ async def manage_splines(
     knot_index: Annotated[int, "Zero-based index of the knot"] | None = None,
     spline_type: Annotated[Literal["CatmullRom", "Bezier", "Linear"], "Type of spline interpolation"] | None = None,
 ) -> dict[str, Any]:
-    u = get_unity_instance_from_context(ctx)
+    u = await get_unity_instance_from_context(ctx)
     p = {k: v for k, v in {
         "action": action,
         "target": target,

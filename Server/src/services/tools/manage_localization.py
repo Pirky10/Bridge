@@ -24,7 +24,7 @@ async def manage_localization(
     target: Annotated[str, "Target GameObject for LocalizeStringEvent"] | None = None,
     path: Annotated[str, "Asset save path"] | None = None,
 ) -> dict[str, Any]:
-    unity_instance = get_unity_instance_from_context(ctx)
+    unity_instance = await get_unity_instance_from_context(ctx)
     params_dict = {k: v for k, v in {
         "action": action, "locale_code": locale_code, "table_name": table_name,
         "key": key, "value": value, "locale": locale, "target": target, "path": path

@@ -99,7 +99,7 @@ async def manage_physics(
     max_distance: Annotated[float, "Maximum raycast distance"] | None = None,
 
 ) -> dict[str, Any]:
-    unity_instance = get_unity_instance_from_context(ctx)
+    unity_instance = await get_unity_instance_from_context(ctx)
 
     params_dict = {
         "action": action,

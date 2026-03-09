@@ -35,7 +35,7 @@ async def capture_screenshot(
     super_size: Annotated[int, "Super-resolution multiplier for game_view capture"] | None = None,
 
 ) -> dict[str, Any]:
-    unity_instance = get_unity_instance_from_context(ctx)
+    unity_instance = await get_unity_instance_from_context(ctx)
 
     params_dict = {
         "action": action,

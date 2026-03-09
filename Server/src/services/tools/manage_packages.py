@@ -34,7 +34,7 @@ async def manage_packages(
     git_url: Annotated[str, "Git repository URL for install_git_package (e.g. 'https://github.com/user/repo.git' or 'https://github.com/user/repo.git#branch')"] | None = None,
 
 ) -> dict[str, Any]:
-    unity_instance = get_unity_instance_from_context(ctx)
+    unity_instance = await get_unity_instance_from_context(ctx)
 
     params_dict = {
         "action": action,

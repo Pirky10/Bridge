@@ -43,7 +43,7 @@ async def manage_layout(
     flexible_height: Annotated[float, "LayoutElement flexible height"] | None = None,
     ignore_layout: Annotated[bool, "LayoutElement ignore layout"] | None = None,
 ) -> dict[str, Any]:
-    unity_instance = get_unity_instance_from_context(ctx)
+    unity_instance = await get_unity_instance_from_context(ctx)
     params_dict = {k: v for k, v in locals().items() if v is not None and k not in ("ctx", "unity_instance", "self")}
     result = await send_with_unity_instance(async_send_command_with_retry, unity_instance, "manage_layout", params_dict)
     return result if isinstance(result, dict) else {"success": False, "message": str(result)}

@@ -19,7 +19,7 @@ async def duplicate_scene_setup(
     objects: Annotated[list[str], "GameObject names to copy"] | None = None,
     open_new: Annotated[bool, "Open the new scene after duplication"] | None = None,
 ) -> dict[str, Any]:
-    u = get_unity_instance_from_context(ctx)
+    u = await get_unity_instance_from_context(ctx)
     p = {k: v for k, v in {"action": action, "new_scene_path": new_scene_path, "target_scene_path": target_scene_path, "objects": objects, "open_new": open_new}.items() if v is not None}
     r = await send_with_unity_instance(async_send_command_with_retry, u, "duplicate_scene_setup", p)
     return r if isinstance(r, dict) else {"success": False, "message": str(r)}

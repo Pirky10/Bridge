@@ -37,7 +37,7 @@ async def manage_scene_view(
     draw_mode: Annotated[str, "Draw mode: Textured, Wireframe, TexturedWire, ShadedWireframe, Shaded"] | None = None,
     orthographic: Annotated[bool, "Enable/disable orthographic projection"] | None = None,
 ) -> dict[str, Any]:
-    u = get_unity_instance_from_context(ctx)
+    u = await get_unity_instance_from_context(ctx)
     p = {k: v for k, v in {
         "action": action, "target": target, "position": position,
         "rotation": rotation, "size": size, "enabled": enabled,

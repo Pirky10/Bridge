@@ -20,7 +20,7 @@ async def convert_to_prefab(
     variant_path: Annotated[str, "Save path for variant"] | None = None,
     completely: Annotated[bool, "Unpack completely (vs outermost)"] | None = None,
 ) -> dict[str, Any]:
-    u = get_unity_instance_from_context(ctx)
+    u = await get_unity_instance_from_context(ctx)
     p = {k: v for k, v in {"action": action, "target": target, "save_path": save_path, "base_prefab_path": base_prefab_path, "variant_path": variant_path, "completely": completely}.items() if v is not None}
     r = await send_with_unity_instance(async_send_command_with_retry, u, "convert_to_prefab", p)
     return r if isinstance(r, dict) else {"success": False, "message": str(r)}

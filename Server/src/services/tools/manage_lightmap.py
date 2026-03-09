@@ -30,7 +30,7 @@ async def manage_lightmap(
     ao_max_distance: Annotated[float, "AO max distance"] | None = None,
     receive_gi: Annotated[str, "Receive GI mode: lightmaps, lightprobes"] | None = None,
 ) -> dict[str, Any]:
-    unity_instance = get_unity_instance_from_context(ctx)
+    unity_instance = await get_unity_instance_from_context(ctx)
     params_dict = {k: v for k, v in {
         "action": action, "target": target, "contribute_gi": contribute_gi,
         "include_children": include_children, "lightmap_scale": lightmap_scale,

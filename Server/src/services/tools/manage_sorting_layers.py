@@ -17,7 +17,7 @@ async def manage_sorting_layers(
     layer_name: Annotated[str, "Sorting layer name"] | None = None,
     order: Annotated[list[str], "New order of layer names for reorder"] | None = None,
 ) -> dict[str, Any]:
-    u = get_unity_instance_from_context(ctx)
+    u = await get_unity_instance_from_context(ctx)
     p = {k: v for k, v in {"action": action, "layer_name": layer_name, "order": order}.items() if v is not None}
     r = await send_with_unity_instance(async_send_command_with_retry, u, "manage_sorting_layers", p)
     return r if isinstance(r, dict) else {"success": False, "message": str(r)}

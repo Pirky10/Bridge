@@ -28,7 +28,7 @@ async def manage_occlusion_culling(
     backface_threshold: Annotated[float, "Backface threshold"] | None = None,
     open: Annotated[bool, "Portal open state"] | None = None,
 ) -> dict[str, Any]:
-    unity_instance = get_unity_instance_from_context(ctx)
+    unity_instance = await get_unity_instance_from_context(ctx)
     params_dict = {k: v for k, v in locals().items() if v is not None and k not in ("ctx", "unity_instance", "self")}
     result = await send_with_unity_instance(async_send_command_with_retry, unity_instance, "manage_occlusion_culling", params_dict)
     return result if isinstance(result, dict) else {"success": False, "message": str(result)}

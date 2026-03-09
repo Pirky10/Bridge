@@ -24,7 +24,7 @@ async def manage_visual_scripting(
     variable_value: Annotated[Any, "Value of the variable"] | None = None,
     target: Annotated[str, "GameObject to assign the graph to"] | None = None,
 ) -> dict[str, Any]:
-    u = get_unity_instance_from_context(ctx)
+    u = await get_unity_instance_from_context(ctx)
     p = {k: v for k, v in {
         "action": action,
         "graph_path": graph_path,

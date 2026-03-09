@@ -54,7 +54,7 @@ async def manage_lighting(
     fog_density: Annotated[float, "Fog density"] | None = None,
 
 ) -> dict[str, Any]:
-    unity_instance = get_unity_instance_from_context(ctx)
+    unity_instance = await get_unity_instance_from_context(ctx)
 
     params_dict = {
         "action": action, "target": target, "name": name,
