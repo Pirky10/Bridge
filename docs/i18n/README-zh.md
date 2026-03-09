@@ -138,7 +138,7 @@ openupm add com.coplaydev.unity-mcp
   "mcpServers": {
     "unityMCP": {
       "command": "uvx",
-      "args": ["--from", "mcpforunityserver", "mcp-for-unity", "--transport", "stdio"]
+      "args": ["--from", "bridge-ai-unity-mcp", "mcp-for-unity", "--transport", "stdio"]
     }
   }
 }
@@ -150,7 +150,7 @@ openupm add com.coplaydev.unity-mcp
   "mcpServers": {
     "unityMCP": {
       "command": "C:/Users/YOUR_USERNAME/AppData/Local/Microsoft/WinGet/Links/uvx.exe",
-      "args": ["--from", "mcpforunityserver", "mcp-for-unity", "--transport", "stdio"]
+      "args": ["--from", "bridge-ai-unity-mcp", "mcp-for-unity", "--transport", "stdio"]
     }
   }
 }
