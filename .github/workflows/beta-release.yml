@@ -148,7 +148,7 @@ jobs:
     if: github.actor != 'github-actions[bot]'
     environment:
       name: pypi
-      url: https://pypi.org/p/mcpforunityserver
+      url: https://pypi.org/p/bridge-ai-unity-mcp
     permissions:
       contents: read
       id-token: write
