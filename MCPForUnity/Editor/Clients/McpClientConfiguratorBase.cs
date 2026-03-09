@@ -95,8 +95,8 @@ namespace MCPForUnity.Editor.Clients
         /// <summary>
         /// Checks if a package source string represents a beta/prerelease version.
         /// Beta versions include:
-        /// - PyPI beta: "mcpforunityserver==9.4.0b20250203..." (contains 'b' before timestamp)
-        /// - PyPI prerelease range: "mcpforunityserver>=0.0.0a0" (used for prerelease package builds)
+        /// - PyPI beta: "bridge-ai-unity-mcp==9.4.0b20250203..." (contains 'b' before timestamp)
+        /// - PyPI prerelease range: "bridge-ai-unity-mcp>=0.0.0a0" (used for prerelease package builds)
         /// - Git beta branch: contains "@beta" or "-beta"
         /// </summary>
         protected static bool IsBetaPackageSource(string packageSource)
@@ -104,7 +104,7 @@ namespace MCPForUnity.Editor.Clients
             if (string.IsNullOrEmpty(packageSource))
                 return false;
 
-            // PyPI beta format: mcpforunityserver==X.Y.Zb<timestamp>
+            // PyPI beta format: bridge-ai-unity-mcp==X.Y.Zb<timestamp>
             // The 'b' suffix before numbers indicates a PEP 440 beta version
             if (System.Text.RegularExpressions.Regex.IsMatch(packageSource, @"==\d+\.\d+\.\d+b\d+"))
                 return true;
@@ -1156,7 +1156,7 @@ namespace MCPForUnity.Editor.Clients
 
         /// <summary>
         /// Extracts the package source (--from argument value) from claude mcp get output.
-        /// The output format includes args like: --from "mcpforunityserver==9.0.1"
+        /// The output format includes args like: --from "bridge-ai-unity-mcp==9.0.1"
         /// </summary>
         private static string ExtractPackageSourceFromCliOutput(string cliOutput)
         {

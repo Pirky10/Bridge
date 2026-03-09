@@ -34,7 +34,7 @@ This sets an override stored in the Editor (key: `MCPForUnity.UvPath`) so MCP fo
       "command": "C:\\Users\\YOU\\AppData\\Local\\Microsoft\\WinGet\\Links\\uvx.exe",
       "args": [
         "--from",
-        "mcpforunityserver",
+        "bridge-ai-unity-mcp",
         "mcp-for-unity",
         "--transport",
         "stdio"
@@ -47,7 +47,7 @@ This sets an override stored in the Editor (key: `MCPForUnity.UvPath`) so MCP fo
 - Manually run the same command in PowerShell to confirm it launches:
 
 ```powershell
-"C:\Users\YOU\AppData\Local\Microsoft\WinGet\Links\uvx.exe" --from mcpforunityserver mcp-for-unity --transport stdio
+"C:\Users\YOU\AppData\Local\Microsoft\WinGet\Links\uvx.exe" --from bridge-ai-unity-mcp mcp-for-unity --transport stdio
 ```
 
 If that runs without error, restart Cursor and it should connect.
