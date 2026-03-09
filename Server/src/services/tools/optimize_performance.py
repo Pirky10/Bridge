@@ -34,7 +34,7 @@ async def optimize_performance(
     target_fps: Annotated[int, "Target FPS"] | None = None,
     poly_threshold: Annotated[int, "Polygon threshold for list_high_poly (default: 10000)"] | None = None,
 ) -> dict[str, Any]:
-    unity_instance = get_unity_instance_from_context(ctx)
+    unity_instance = await get_unity_instance_from_context(ctx)
 
     # Handle list_high_poly as a direct Unity code execution
     if (area or "").lower() == "list_high_poly":

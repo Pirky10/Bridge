@@ -36,7 +36,7 @@ async def manage_selection(
     layer: Annotated[str, "Layer name or index for select_by_layer"] | None = None,
     add_to_selection: Annotated[bool, "If true, add to current selection instead of replacing"] | None = None,
 ) -> dict[str, Any]:
-    u = get_unity_instance_from_context(ctx)
+    u = await get_unity_instance_from_context(ctx)
     p = {k: v for k, v in {
         "action": action, "target": target, "targets": targets,
         "component_type": component_type, "tag": tag, "layer": layer,

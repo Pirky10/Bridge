@@ -47,7 +47,7 @@ async def manage_cinemachine(
     frequency_gain: Annotated[float, "Noise frequency gain"] | None = None,
 
 ) -> dict[str, Any]:
-    unity_instance = get_unity_instance_from_context(ctx)
+    unity_instance = await get_unity_instance_from_context(ctx)
 
     params_dict = {
         "action": action, "target": target, "name": name,

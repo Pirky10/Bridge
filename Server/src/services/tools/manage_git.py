@@ -42,7 +42,7 @@ async def manage_git(
     num_entries: Annotated[int, "Number of log entries (default: 10)"] | None = None,
     commit_hash: Annotated[str, "Commit hash (for show action)"] | None = None,
 ) -> dict[str, Any]:
-    unity_instance = get_unity_instance_from_context(ctx)
+    unity_instance = await get_unity_instance_from_context(ctx)
 
     # Get the project path from Unity
     try:

@@ -20,7 +20,7 @@ async def manage_scriptable_object_editor(
     save_path: Annotated[str, "Asset path for the generated editor script"] | None = None,
     layout_template: Annotated[str, "Optional template for the custom layout"] | None = None,
 ) -> dict[str, Any]:
-    u = get_unity_instance_from_context(ctx)
+    u = await get_unity_instance_from_context(ctx)
     p = {k: v for k, v in {
         "action": action,
         "so_type": so_type,

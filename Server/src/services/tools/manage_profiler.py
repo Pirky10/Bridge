@@ -32,7 +32,7 @@ async def manage_profiler(
     log_file: Annotated[str, "Path for profiler log file (for start_recording)"] | None = None,
 
 ) -> dict[str, Any]:
-    unity_instance = get_unity_instance_from_context(ctx)
+    unity_instance = await get_unity_instance_from_context(ctx)
 
     params_dict = {"action": action}
     if log_file is not None:

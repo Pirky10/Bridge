@@ -49,7 +49,7 @@ async def manage_audio(
     clip_path: Annotated[str, "Path to AudioClip asset (Assets/...)"] | None = None,
 
 ) -> dict[str, Any]:
-    unity_instance = get_unity_instance_from_context(ctx)
+    unity_instance = await get_unity_instance_from_context(ctx)
 
     params_dict = {
         "action": action,

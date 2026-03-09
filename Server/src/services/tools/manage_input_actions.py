@@ -57,7 +57,7 @@ async def manage_input_actions(
     processors: Annotated[str, "Processor string to set on action/binding (e.g. 'InvertVector2(invertX=true)')"] | None = None,
 
 ) -> dict[str, Any]:
-    unity_instance = get_unity_instance_from_context(ctx)
+    unity_instance = await get_unity_instance_from_context(ctx)
 
     params_dict = {
         "action": action, "path": path, "map_name": map_name,

@@ -31,7 +31,7 @@ async def manage_cloth(
     collision_sphere_distance: Annotated[float, "Collision sphere distance"] | None = None,
     pinned_vertices: Annotated[list[int], "Vertex indices to pin (maxDistance=0)"] | None = None,
 ) -> dict[str, Any]:
-    unity_instance = get_unity_instance_from_context(ctx)
+    unity_instance = await get_unity_instance_from_context(ctx)
     params_dict = {k: v for k, v in {
         "action": action, "target": target, "bending_stiffness": bending_stiffness,
         "stretching_stiffness": stretching_stiffness, "damping": damping, "friction": friction,

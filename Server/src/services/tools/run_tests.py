@@ -180,7 +180,7 @@ async def run_tests(
         return await _poll_test_job(ctx, job_id, include_failed_tests, include_details, wait_timeout)
 
     # action == "start"
-    unity_instance = get_unity_instance_from_context(ctx)
+    unity_instance = await get_unity_instance_from_context(ctx)
 
     gate = await preflight(ctx, requires_no_tests=True, wait_for_no_compile=True, refresh_if_dirty=True)
     if isinstance(gate, MCPResponse):
@@ -236,7 +236,7 @@ async def _poll_test_job(
                             "Reduces polling frequency and avoids client-side loop detection. "
                             "Recommended: 30-60 seconds. Returns immediately if tests complete sooner."] = None,
 ) -> GetTestJobResponse | MCPResponse:
-    unity_instance = get_unity_instance_from_context(ctx)
+    unity_instance = await get_unity_instance_from_context(ctx)
 
     params: dict[str, Any] = {"job_id": job_id}
     if include_failed_tests:

@@ -38,7 +38,7 @@ async def manage_tags_layers(
     recursive: Annotated[bool, "Apply layer to all children"] | None = None,
 
 ) -> dict[str, Any]:
-    unity_instance = get_unity_instance_from_context(ctx)
+    unity_instance = await get_unity_instance_from_context(ctx)
 
     params_dict = {
         "action": action, "target": target, "tag": tag,

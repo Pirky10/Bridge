@@ -24,7 +24,7 @@ async def manage_scriptable_objects_bulk(
     field_name: Annotated[str, "Field name for bulk_set"] | None = None,
     field_value: Annotated[Any, "Value to set (int, float, string, bool)"] | None = None,
 ) -> dict[str, Any]:
-    u = get_unity_instance_from_context(ctx)
+    u = await get_unity_instance_from_context(ctx)
     p = {k: v for k, v in {
         "action": action, "so_type": so_type, "count": count, "folder": folder,
         "name_prefix": name_prefix, "template_path": template_path,

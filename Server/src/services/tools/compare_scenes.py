@@ -20,7 +20,7 @@ async def compare_scenes(
     target_scene: Annotated[str, "Asset path to the target scene to compare against"],
     compare_options: Annotated[dict[str, Any], "Optional flags for comparison (e.g. ignore_transform, deep_compare)"] | None = None,
 ) -> dict[str, Any]:
-    u = get_unity_instance_from_context(ctx)
+    u = await get_unity_instance_from_context(ctx)
     p = {k: v for k, v in {
         "action": action,
         "source_scene": source_scene,

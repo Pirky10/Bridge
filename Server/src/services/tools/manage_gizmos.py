@@ -29,7 +29,7 @@ async def manage_gizmos(
     component_type: Annotated[str, "Component type for toggling gizmos"] | None = None,
     enabled: Annotated[bool, "Enable/disable gizmo"] | None = None,
 ) -> dict[str, Any]:
-    u = get_unity_instance_from_context(ctx)
+    u = await get_unity_instance_from_context(ctx)
     p = {k: v for k, v in locals().items() if v is not None and k not in ("ctx", "u", "self")}
     r = await send_with_unity_instance(async_send_command_with_retry, u, "manage_gizmos", p)
     return r if isinstance(r, dict) else {"success": False, "message": str(r)}

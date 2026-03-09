@@ -43,7 +43,7 @@ async def manage_mesh(
     merge_submeshes: Annotated[bool, "Merge submeshes when combining"] | None = None,
     include_vertices: Annotated[bool, "Include vertex data in export (can be large)"] | None = None,
 ) -> dict[str, Any]:
-    u = get_unity_instance_from_context(ctx)
+    u = await get_unity_instance_from_context(ctx)
     p = {k: v for k, v in {
         "action": action, "target": target, "targets": targets, "name": name,
         "mesh_type": mesh_type, "vertices": vertices, "triangles": triangles,

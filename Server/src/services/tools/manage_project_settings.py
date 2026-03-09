@@ -27,7 +27,7 @@ async def manage_project_settings(
     backend: Annotated[str, "Scripting backend: mono, il2cpp"] | None = None,
     level: Annotated[str, "API level: net_standard, net_framework"] | None = None,
 ) -> dict[str, Any]:
-    u = get_unity_instance_from_context(ctx)
+    u = await get_unity_instance_from_context(ctx)
     p = {k: v for k, v in locals().items() if v is not None and k not in ("ctx", "u", "self")}
     r = await send_with_unity_instance(async_send_command_with_retry, u, "manage_project_settings", p)
     return r if isinstance(r, dict) else {"success": False, "message": str(r)}

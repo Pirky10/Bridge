@@ -44,7 +44,7 @@ async def manage_video_player(
     render_texture_path: Annotated[str, "Path to save RenderTexture asset"] | None = None,
 
 ) -> dict[str, Any]:
-    unity_instance = get_unity_instance_from_context(ctx)
+    unity_instance = await get_unity_instance_from_context(ctx)
 
     params_dict = {
         "action": action, "target": target,

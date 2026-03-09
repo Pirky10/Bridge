@@ -21,7 +21,7 @@ async def manage_editor_window(
     element_type: Annotated[str, "Type of UI element to add (e.g. Button, Label, TextField)"] | None = None,
     element_properties: Annotated[dict[str, Any], "Properties for the UI element"] | None = None,
 ) -> dict[str, Any]:
-    u = get_unity_instance_from_context(ctx)
+    u = await get_unity_instance_from_context(ctx)
     p = {k: v for k, v in {
         "action": action,
         "window_name": window_name,

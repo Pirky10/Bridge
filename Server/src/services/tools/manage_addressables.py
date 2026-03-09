@@ -22,7 +22,7 @@ async def manage_addressables(
     label: Annotated[str, "Label to set"] | None = None,
     address: Annotated[str, "Addressable address/key"] | None = None,
 ) -> dict[str, Any]:
-    unity_instance = get_unity_instance_from_context(ctx)
+    unity_instance = await get_unity_instance_from_context(ctx)
     params_dict = {k: v for k, v in {"action": action, "asset_path": asset_path, "group_name": group_name, "group": group, "label": label, "address": address}.items() if v is not None}
     result = await send_with_unity_instance(async_send_command_with_retry, unity_instance, "manage_addressables", params_dict)
     return result if isinstance(result, dict) else {"success": False, "message": str(result)}

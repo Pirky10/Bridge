@@ -32,7 +32,7 @@ async def plan_feature(
     target_platforms: Annotated[str, "Target platforms (e.g., 'PC, Mobile')"] | None = None,
     considerations: Annotated[str, "Additional considerations or constraints"] | None = None,
 ) -> dict[str, Any]:
-    unity_instance = get_unity_instance_from_context(ctx)
+    unity_instance = await get_unity_instance_from_context(ctx)
 
     # Gather project context from Unity
     context_data = {}
