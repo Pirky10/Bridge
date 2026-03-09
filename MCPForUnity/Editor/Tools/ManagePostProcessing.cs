@@ -125,8 +125,40 @@ namespace MCPForUnity.Editor.Tools
                 return new ErrorResponse($"Override type '{overrideType}' not found. Try: Bloom, ColorAdjustments, Vignette, DepthOfField, MotionBlur, LensDistortion, ChromaticAberration, FilmGrain, Tonemapping");
 
             Undo.RecordObject((UnityEngine.Object)profile, "Add Override");
-            MethodInfo addMethod = _volumeProfileType.GetMethod("Add", new Type[] { typeof(Type), typeof(bool) });
-            addMethod?.Invoke(profile, new object[] { effectType, true });
+
+            // Try the generic Add<T>(bool) method first (more reliable across Unity versions)
+            object newComp = null;
+            MethodInfo genericAdd = null;
+            foreach (var m in _volumeProfileType.GetMethods())
+            {
+                if (m.Name == "Add" && m.IsGenericMethodDefinition && m.GetParameters().Length == 1
+                    && m.GetParameters()[0].ParameterType == typeof(bool))
+                {
+                    genericAdd = m;
+                    break;
+                }
+            }
+
+            if (genericAdd != null)
+            {
+                MethodInfo constructed = genericAdd.MakeGenericMethod(effectType);
+                newComp = constructed.Invoke(profile, new object[] { true });
+            }
+            else
+            {
+                // Fallback: non-generic Add(Type, bool)
+                MethodInfo addMethod = _volumeProfileType.GetMethod("Add", new Type[] { typeof(Type), typeof(bool) });
+                newComp = addMethod?.Invoke(profile, new object[] { effectType, true });
+            }
+
+            // Ensure the new ScriptableObject component is serialized into the profile asset
+            if (newComp is ScriptableObject so)
+            {
+                so.hideFlags = HideFlags.HideInHierarchy | HideFlags.HideInInspector;
+                string profilePath = AssetDatabase.GetAssetPath((UnityEngine.Object)profile);
+                if (!string.IsNullOrEmpty(profilePath))
+                    AssetDatabase.AddObjectToAsset(so, profilePath);
+            }
 
             EditorUtility.SetDirty((UnityEngine.Object)profile);
             AssetDatabase.SaveAssets();
@@ -273,7 +305,16 @@ namespace MCPForUnity.Editor.Tools
             float? weight = p.GetFloat("weight");
             if (weight.HasValue) _volumeType.GetProperty("weight")?.SetValue(vol, weight.Value);
             float? priority = p.GetFloat("priority");
-            if (priority.HasValue) _volumeType.GetProperty("priority")?.SetValue(vol, priority.Value);
+            if (priority.HasValue)
+            {
+                var priorityProp = _volumeType.GetProperty("priority");
+                if (priorityProp != null)
+                {
+                    // priority can be float or int depending on Unity version; ensure correct type
+                    object converted = Convert.ChangeType(priority.Value, priorityProp.PropertyType);
+                    priorityProp.SetValue(vol, converted);
+                }
+            }
             float? blendDist = p.GetFloat("blend_distance");
             if (blendDist.HasValue) _volumeType.GetProperty("blendDistance")?.SetValue(vol, blendDist.Value);
 
@@ -283,9 +324,31 @@ namespace MCPForUnity.Editor.Tools
 
         private static object GetInfo(JObject @params, ToolParams p)
         {
-            var targetResult = p.GetRequired("target");
-            var targetError = targetResult.GetOrError(out string target);
-            if (targetError != null) return targetError;
+            string target = p.Get("target", null);
+
+            // If no target specified, list all Volumes in the scene
+            if (string.IsNullOrEmpty(target))
+            {
+                var allVolumes = UnityEngine.Object.FindObjectsByType(_volumeType, FindObjectsSortMode.None);
+                var volumeInfos = new List<object>();
+                foreach (Component v in allVolumes)
+                {
+                    bool ig = (bool)(_volumeType.GetProperty("isGlobal")?.GetValue(v) ?? false);
+                    float w = (float)(_volumeType.GetProperty("weight")?.GetValue(v) ?? 0f);
+                    object pr = _volumeType.GetProperty("priority")?.GetValue(v);
+                    float prioVal = pr != null ? Convert.ToSingle(pr) : 0f;
+                    object prof = _volumeType.GetProperty("profile")?.GetValue(v);
+                    var ov = new List<string>();
+                    if (prof != null)
+                    {
+                        var cp = _volumeProfileType.GetProperty("components");
+                        var cl = cp?.GetValue(prof) as System.Collections.IList;
+                        if (cl != null) foreach (var c in cl) ov.Add(c.GetType().Name);
+                    }
+                    volumeInfos.Add(new { name = v.gameObject.name, isGlobal = ig, weight = w, priority = prioVal, overrides = ov });
+                }
+                return new SuccessResponse($"Found {volumeInfos.Count} Volume(s) in scene", new { volumes = volumeInfos, count = volumeInfos.Count });
+            }
 
             GameObject go = GameObject.Find(target);
             if (go == null) return new ErrorResponse($"GameObject '{target}' not found.");
@@ -295,7 +358,8 @@ namespace MCPForUnity.Editor.Tools
 
             bool isGlobal = (bool)(_volumeType.GetProperty("isGlobal")?.GetValue(vol) ?? false);
             float weight = (float)(_volumeType.GetProperty("weight")?.GetValue(vol) ?? 0f);
-            float prio = (float)(_volumeType.GetProperty("priority")?.GetValue(vol) ?? 0f);
+            object priorityObj = _volumeType.GetProperty("priority")?.GetValue(vol);
+            float prio = priorityObj != null ? Convert.ToSingle(priorityObj) : 0f;
             float blend = (float)(_volumeType.GetProperty("blendDistance")?.GetValue(vol) ?? 0f);
             object profile = _volumeType.GetProperty("profile")?.GetValue(vol);
 
