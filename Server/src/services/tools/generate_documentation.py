@@ -32,7 +32,7 @@ async def generate_documentation(
     output_format: Annotated[str, "Format: markdown, xml, html"] | None = None,
     include_examples: Annotated[bool, "Include usage examples"] | None = None,
 ) -> dict[str, Any]:
-    unity_instance = get_unity_instance_from_context(ctx)
+    unity_instance = await get_unity_instance_from_context(ctx)
 
     try:
         script_result = await send_with_unity_instance(

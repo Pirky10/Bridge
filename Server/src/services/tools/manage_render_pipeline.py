@@ -52,7 +52,7 @@ async def manage_render_pipeline(
     anti_aliasing: Annotated[int, "URP anti-aliasing mode (0=None, 1=FXAA, 2=SMAA)"] | None = None,
 
 ) -> dict[str, Any]:
-    unity_instance = get_unity_instance_from_context(ctx)
+    unity_instance = await get_unity_instance_from_context(ctx)
 
     params_dict = {
         "action": action, "target": target,

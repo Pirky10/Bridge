@@ -30,7 +30,7 @@ async def manage_undo(
     group_name: Annotated[str, "Name for undo group (begin_group, collapse_group)"] | None = None,
     steps: Annotated[int, "Number of undo/redo steps to perform (default 1)"] | None = None,
 ) -> dict[str, Any]:
-    u = get_unity_instance_from_context(ctx)
+    u = await get_unity_instance_from_context(ctx)
     p = {k: v for k, v in {
         "action": action, "group_name": group_name, "steps": steps,
     }.items() if v is not None}

@@ -21,7 +21,7 @@ async def manage_rendering_layers(
     layer_index: Annotated[int, "Layer index (0-31) for rename"] | None = None,
     layer_name: Annotated[str, "New name for rendering layer"] | None = None,
 ) -> dict[str, Any]:
-    u = get_unity_instance_from_context(ctx)
+    u = await get_unity_instance_from_context(ctx)
     p = {k: v for k, v in {"action": action, "target": target, "rendering_layer_mask": rendering_layer_mask, "layer_index": layer_index, "layer_name": layer_name}.items() if v is not None}
     r = await send_with_unity_instance(async_send_command_with_retry, u, "manage_rendering_layers", p)
     return r if isinstance(r, dict) else {"success": False, "message": str(r)}

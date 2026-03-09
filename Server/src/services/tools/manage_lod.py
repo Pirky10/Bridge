@@ -38,7 +38,7 @@ async def manage_lod(
     animate_cross_fading: Annotated[bool, "Enable animated cross-fading"] | None = None,
 
 ) -> dict[str, Any]:
-    unity_instance = get_unity_instance_from_context(ctx)
+    unity_instance = await get_unity_instance_from_context(ctx)
 
     params_dict = {
         "action": action, "target": target,

@@ -32,7 +32,7 @@ async def review_code(
     focus_areas: Annotated[str, "Specific areas to focus on: performance, security, readability, best_practices, bugs"] | None = None,
     context: Annotated[str, "Additional context about what the code does"] | None = None,
 ) -> dict[str, Any]:
-    unity_instance = get_unity_instance_from_context(ctx)
+    unity_instance = await get_unity_instance_from_context(ctx)
 
     # Read the script content via Unity
     try:

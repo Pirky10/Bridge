@@ -21,7 +21,7 @@ async def manage_shader_graph(
     property_name: Annotated[str, "Name of the graph property"] | None = None,
     property_value: Annotated[Any, "Value for the property"] | None = None,
 ) -> dict[str, Any]:
-    u = get_unity_instance_from_context(ctx)
+    u = await get_unity_instance_from_context(ctx)
     p = {k: v for k, v in {
         "action": action,
         "graph_path": graph_path,

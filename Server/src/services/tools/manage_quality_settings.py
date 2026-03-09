@@ -41,7 +41,7 @@ async def manage_quality_settings(
     anisotropic_filtering: Annotated[str, "Anisotropic filtering: Disable, Enable, ForceEnable"] | None = None,
 
 ) -> dict[str, Any]:
-    unity_instance = get_unity_instance_from_context(ctx)
+    unity_instance = await get_unity_instance_from_context(ctx)
 
     params_dict = {
         "action": action, "level": level, "level_name": level_name,

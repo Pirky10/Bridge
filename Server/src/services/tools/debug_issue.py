@@ -34,7 +34,7 @@ async def debug_issue(
     steps_to_reproduce: Annotated[str, "Steps to reproduce the issue"] | None = None,
     what_was_tried: Annotated[str, "What has already been tried to fix it"] | None = None,
 ) -> dict[str, Any]:
-    unity_instance = get_unity_instance_from_context(ctx)
+    unity_instance = await get_unity_instance_from_context(ctx)
 
     # Gather console logs from Unity
     context_data = {}

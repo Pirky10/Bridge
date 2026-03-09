@@ -20,7 +20,7 @@ async def manage_game_view(
     scale: Annotated[float, "Zoom scale for the game view"] | None = None,
     enabled: Annotated[bool, "Toggle state"] | None = None,
 ) -> dict[str, Any]:
-    u = get_unity_instance_from_context(ctx)
+    u = await get_unity_instance_from_context(ctx)
     p = {k: v for k, v in {
         "action": action,
         "aspect_ratio": aspect_ratio,

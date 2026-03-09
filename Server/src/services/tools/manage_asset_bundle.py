@@ -21,7 +21,7 @@ async def manage_asset_bundle(
     platform: Annotated[str, "Target build platform (e.g. Android, iOS, StandaloneWindows64)"] | None = None,
     output_path: Annotated[str, "Path where bundles will be built"] | None = None,
 ) -> dict[str, Any]:
-    u = get_unity_instance_from_context(ctx)
+    u = await get_unity_instance_from_context(ctx)
     p = {k: v for k, v in {
         "action": action,
         "asset_path": asset_path,

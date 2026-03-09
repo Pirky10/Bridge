@@ -19,7 +19,7 @@ async def manage_presets(
     save_path: Annotated[str, "Path to save preset asset"] | None = None,
     preset_path: Annotated[str, "Path to existing preset"] | None = None,
 ) -> dict[str, Any]:
-    u = get_unity_instance_from_context(ctx)
+    u = await get_unity_instance_from_context(ctx)
     p = {k: v for k, v in {"action": action, "target": target, "component_type": component_type, "save_path": save_path, "preset_path": preset_path}.items() if v is not None}
     r = await send_with_unity_instance(async_send_command_with_retry, u, "manage_presets", p)
     return r if isinstance(r, dict) else {"success": False, "message": str(r)}

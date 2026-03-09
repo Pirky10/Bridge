@@ -32,7 +32,7 @@ async def explain_code(
     detail_level: Annotated[str, "Detail level: beginner, intermediate, advanced"] | None = None,
     explain_unity_apis: Annotated[bool, "Also explain Unity-specific APIs used"] | None = None,
 ) -> dict[str, Any]:
-    unity_instance = get_unity_instance_from_context(ctx)
+    unity_instance = await get_unity_instance_from_context(ctx)
 
     try:
         script_result = await send_with_unity_instance(

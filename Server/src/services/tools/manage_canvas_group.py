@@ -22,7 +22,7 @@ async def manage_canvas_group(
     blocks_raycasts: Annotated[bool, "Blocks raycasts"] | None = None,
     ignore_parent_groups: Annotated[bool, "Ignore parent groups"] | None = None,
 ) -> dict[str, Any]:
-    unity_instance = get_unity_instance_from_context(ctx)
+    unity_instance = await get_unity_instance_from_context(ctx)
     params_dict = {k: v for k, v in {"action": action, "target": target, "alpha": alpha, "interactable": interactable, "blocks_raycasts": blocks_raycasts, "ignore_parent_groups": ignore_parent_groups}.items() if v is not None}
     result = await send_with_unity_instance(async_send_command_with_retry, unity_instance, "manage_canvas_group", params_dict)
     return result if isinstance(result, dict) else {"success": False, "message": str(result)}

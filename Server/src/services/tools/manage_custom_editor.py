@@ -20,7 +20,7 @@ async def manage_custom_editor(
     target_type: Annotated[str, "Type name for property drawer"] | None = None,
     save_path: Annotated[str, "Save path for generated script"] | None = None,
 ) -> dict[str, Any]:
-    u = get_unity_instance_from_context(ctx)
+    u = await get_unity_instance_from_context(ctx)
     p = {k: v for k, v in {"action": action, "target_script": target_script, "target_type": target_type, "save_path": save_path}.items() if v is not None}
     r = await send_with_unity_instance(async_send_command_with_retry, u, "manage_custom_editor", p)
     return r if isinstance(r, dict) else {"success": False, "message": str(r)}

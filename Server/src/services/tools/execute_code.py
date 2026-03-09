@@ -39,7 +39,7 @@ async def execute_code(
     arguments: Annotated[list, "Method arguments as array (for 'run_static_method')"] | None = None,
 
 ) -> dict[str, Any]:
-    unity_instance = get_unity_instance_from_context(ctx)
+    unity_instance = await get_unity_instance_from_context(ctx)
 
     params_dict = {
         "action": action,

@@ -31,7 +31,7 @@ async def chat_with_context(
     context_sources: Annotated[str, "Context to gather: hierarchy, scripts, settings, logs, all"] | None = None,
     script_path: Annotated[str, "Specific script to include as context"] | None = None,
 ) -> dict[str, Any]:
-    unity_instance = get_unity_instance_from_context(ctx)
+    unity_instance = await get_unity_instance_from_context(ctx)
 
     sources = (context_sources or "all").lower().split(",")
     sources = [s.strip() for s in sources]
