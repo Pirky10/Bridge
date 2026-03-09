@@ -14,7 +14,7 @@ namespace MCPForUnityTests.Editor.Helpers
     {
         /// <summary>
         /// Validates that a TOML args array contains the expected uvx structure:
-        /// --from, a mcpforunityserver reference, mcp-for-unity package name,
+        /// --from, a bridge-ai-unity-mcp reference, mcp-for-unity package name,
         /// and optionally --prerelease/explicit (only for prerelease builds).
         /// </summary>
         private static void AssertValidUvxArgs(TomlArray args)
@@ -24,7 +24,7 @@ namespace MCPForUnityTests.Editor.Helpers
                 argValues.Add((child as TomlString).Value);
 
             Assert.IsTrue(argValues.Contains("--from"), "Args should contain --from");
-            Assert.IsTrue(argValues.Any(a => a.Contains("mcpforunityserver")), "Args should contain PyPI package reference");
+            Assert.IsTrue(argValues.Any(a => a.Contains("bridge-ai-unity-mcp")), "Args should contain PyPI package reference");
             Assert.IsTrue(argValues.Contains("mcp-for-unity"), "Args should contain package name");
 
             // Prerelease builds include --prerelease explicit before --from

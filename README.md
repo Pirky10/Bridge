@@ -138,7 +138,7 @@ If auto-setup doesn't work, add this to your MCP client's config file:
   "mcpServers": {
     "unityMCP": {
       "command": "uvx",
-      "args": ["--from", "mcpforunityserver", "mcp-for-unity", "--transport", "stdio"]
+      "args": ["--from", "bridge-ai-unity-mcp", "mcp-for-unity", "--transport", "stdio"]
     }
   }
 }
@@ -150,7 +150,7 @@ If auto-setup doesn't work, add this to your MCP client's config file:
   "mcpServers": {
     "unityMCP": {
       "command": "C:/Users/YOUR_USERNAME/AppData/Local/Microsoft/WinGet/Links/uvx.exe",
-      "args": ["--from", "mcpforunityserver", "mcp-for-unity", "--transport", "stdio"]
+      "args": ["--from", "bridge-ai-unity-mcp", "mcp-for-unity", "--transport", "stdio"]
     }
   }
 }
