@@ -378,9 +378,8 @@ def _normalize_import_settings(value: Any) -> tuple[dict | None, str | None]:
     description=(
         "Procedural texture generation for Unity. Creates textures with solid fills, "
         "patterns (checkerboard, stripes, dots, grid, brick), gradients, and noise. "
-        "Also manages RenderTextures: create, configure, and assign to specific cameras. "
         "Actions: create, modify, delete, create_sprite, apply_pattern, apply_gradient, apply_noise, "
-        "create_render_texture, configure_render_texture, assign_render_texture."
+        "set_import_settings"
     ),
     annotations=ToolAnnotations(
         title="Manage Texture",
@@ -397,9 +396,7 @@ async def manage_texture(
         "apply_pattern",
         "apply_gradient",
         "apply_noise",
-        "create_render_texture",
-        "configure_render_texture",
-        "assign_render_texture"
+        "set_import_settings"
     ], "Action to perform."],
 
     # Required for most actions
@@ -448,12 +445,6 @@ async def manage_texture(
     # Modify action
     set_pixels: Annotated[dict,
                           "Region to modify: {x, y, width, height, color or pixels}"] | None = None,
-
-    # RenderTexture / Camera settings
-    color_format: Annotated[str, "RenderTexture color format: Default, ARGB32, RGB565, etc."] | None = None,
-    depth_buffer: Annotated[int, "Depth buffer bits: 0, 16, 24, 32"] | None = None,
-    anti_aliasing: Annotated[int, "Anti-aliasing level: 1, 2, 4, 8"] | None = None,
-    camera_target: Annotated[str, "Camera GameObject name to assign RenderTexture to"] | None = None,
 
     # Sprite creation (legacy, prefer import_settings)
     as_sprite: Annotated[dict | bool,
@@ -583,10 +574,6 @@ async def manage_texture(
         "setPixels": set_pixels_normalized,
         "spriteSettings": sprite_settings,
         "importSettings": import_settings_normalized,
-        "colorFormat": color_format,
-        "depthBuffer": depth_buffer,
-        "antiAliasing": anti_aliasing,
-        "cameraTarget": camera_target,
     }
 
     # Remove None values

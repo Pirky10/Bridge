@@ -1,7 +1,4 @@
-"""
-Defines the manage_packages tool for Unity Package Manager operations.
-"""
-from typing import Annotated, Any, Literal
+from typing import Annotated, Any, Optional
 
 from fastmcp import Context
 from mcp.types import ToolAnnotations
@@ -11,46 +8,81 @@ from services.tools import get_unity_instance_from_context
 from transport.unity_transport import send_with_unity_instance
 from transport.legacy.unity_connection import async_send_command_with_retry
 
+ALL_ACTIONS = [
+    "list_packages", "search_packages", "get_package_info", "ping", "status",
+    "add_package", "remove_package", "embed_package", "resolve_packages",
+    "add_registry", "remove_registry", "list_registries",
+]
+
+
+async def _send_packages_command(
+    ctx: Context,
+    params_dict: dict[str, Any],
+) -> dict[str, Any]:
+    unity_instance = await get_unity_instance_from_context(ctx)
+    result = await send_with_unity_instance(
+        async_send_command_with_retry, unity_instance, "manage_packages", params_dict
+    )
+    return result if isinstance(result, dict) else {"success": False, "message": str(result)}
+
 
 @mcp_for_unity_tool(
+    group="core",
     description=(
-        "Manages Unity packages via the Package Manager. "
-        "Actions: list, install, remove, search, get_info, install_git_package."
+        "Manage Unity packages: query, install, remove, embed, and configure registries.\n\n"
+        "QUERY (read-only):\n"
+        "- list_packages: List all installed packages\n"
+        "- search_packages: Search Unity registry by keyword\n"
+        "- get_package_info: Get details about a specific installed package\n"
+        "- ping: Check package manager availability\n"
+        "- status: Poll async job status (job_id required for list/search; optional for add/remove/embed)\n\n"
+        "INSTALL/REMOVE:\n"
+        "- add_package: Install a package (name, name@version, git URL, or file: path)\n"
+        "- remove_package: Remove a package (checks dependents; use force=true to override)\n\n"
+        "REGISTRIES:\n"
+        "- list_registries: List all scoped registries\n"
+        "- add_registry: Add a scoped registry (e.g., OpenUPM)\n"
+        "- remove_registry: Remove a scoped registry\n\n"
+        "UTILITY:\n"
+        "- embed_package: Copy package to local Packages/ for editing\n"
+        "- resolve_packages: Force re-resolution of all packages"
     ),
     annotations=ToolAnnotations(
         title="Manage Packages",
         destructiveHint=True,
+        readOnlyHint=False,
     ),
 )
 async def manage_packages(
     ctx: Context,
-    action: Annotated[Literal[
-        "list", "install", "remove", "search", "get_info", "install_git_package"
-    ], "Action to perform."],
-
-    package_id: Annotated[str, "Package identifier (e.g., com.unity.inputsystem, com.unity.cinemachine@3.0.0)"] | None = None,
-    query: Annotated[str, "Search query for package search"] | None = None,
-    offline_mode: Annotated[bool, "List only locally cached packages"] | None = None,
-    git_url: Annotated[str, "Git repository URL for install_git_package (e.g. 'https://github.com/user/repo.git' or 'https://github.com/user/repo.git#branch')"] | None = None,
-
+    action: Annotated[str, "The package action to perform."],
+    package: Annotated[Optional[str], "Package identifier (name, name@version, git URL, or file: path)."] = None,
+    force: Annotated[Optional[bool], "Force removal even if other packages depend on it."] = None,
+    query: Annotated[Optional[str], "Search query for search_packages."] = None,
+    job_id: Annotated[Optional[str], "Job ID for polling status."] = None,
+    name: Annotated[Optional[str], "Registry name for add_registry/remove_registry."] = None,
+    url: Annotated[Optional[str], "Registry URL for add_registry."] = None,
+    scopes: Annotated[Optional[list[str]], "Registry scopes for add_registry."] = None,
 ) -> dict[str, Any]:
-    unity_instance = await get_unity_instance_from_context(ctx)
+    action_lower = action.lower()
+    if action_lower not in ALL_ACTIONS:
+        return {
+            "success": False,
+            "message": f"Unknown action '{action}'. Valid actions: {', '.join(ALL_ACTIONS)}",
+        }
 
-    params_dict = {
-        "action": action,
-        "package_id": package_id,
+    params_dict: dict[str, Any] = {"action": action_lower}
+    param_map = {
+        "package": package,
+        "force": force,
         "query": query,
-        "offline_mode": offline_mode,
-        "gitUrl": git_url,
+        "job_id": job_id,
+        "name": name,
+        "url": url,
+        "scopes": scopes,
     }
+    for key, val in param_map.items():
+        if val is not None:
+            params_dict[key] = val
 
-    params_dict = {k: v for k, v in params_dict.items() if v is not None}
-
-    result = await send_with_unity_instance(
-        async_send_command_with_retry,
-        unity_instance,
-        "manage_packages",
-        params_dict,
-    )
-
-    return result if isinstance(result, dict) else {"success": False, "message": str(result)}
+    return await _send_packages_command(ctx, params_dict)

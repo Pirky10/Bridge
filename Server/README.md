@@ -24,7 +24,7 @@ Install and run directly from PyPI using `uvx`.
 **Run Server (HTTP):**
 
 ```bash
-uvx --from bridge-ai-unity-mcp mcp-for-unity --transport http --http-url http://localhost:8080
+uvx --from mcpforunityserver mcp-for-unity --transport http --http-url http://localhost:8080
 ```
 
 **MCP Client Configuration (HTTP):**
@@ -48,7 +48,7 @@ uvx --from bridge-ai-unity-mcp mcp-for-unity --transport http --http-url http://
       "command": "uvx",
       "args": [
         "--from",
-        "bridge-ai-unity-mcp",
+        "mcpforunityserver",
         "mcp-for-unity",
         "--transport",
         "stdio"
@@ -69,7 +69,7 @@ Use this to run the latest released version from the repository. Change the vers
       "command": "uvx",
       "args": [
         "--from",
-        "git+https://github.com/CoplayDev/unity-mcp@v1.0.0#subdirectory=Server",
+        "git+https://github.com/CoplayDev/unity-mcp@v9.6.6#subdirectory=Server",
         "mcp-for-unity",
         "--transport",
         "stdio"
@@ -169,19 +169,19 @@ Telemetry:
 **Stdio (default):**
 
 ```bash
-uvx --from bridge-ai-unity-mcp mcp-for-unity --transport stdio
+uvx --from mcpforunityserver mcp-for-unity --transport stdio
 ```
 
 **HTTP (local):**
 
 ```bash
-uvx --from bridge-ai-unity-mcp mcp-for-unity --transport http --http-host 127.0.0.1 --http-port 8080
+uvx --from mcpforunityserver mcp-for-unity --transport http --http-host 127.0.0.1 --http-port 8080
 ```
 
 **HTTP (remote-hosted with API key auth):**
 
 ```bash
-uvx --from bridge-ai-unity-mcp mcp-for-unity \
+uvx --from mcpforunityserver mcp-for-unity \
   --transport http \
   --http-host 0.0.0.0 \
   --http-port 8080 \
@@ -193,7 +193,7 @@ uvx --from bridge-ai-unity-mcp mcp-for-unity \
 **Disable telemetry:**
 
 ```bash
-DISABLE_TELEMETRY=1 uvx --from bridge-ai-unity-mcp mcp-for-unity --transport stdio
+DISABLE_TELEMETRY=1 uvx --from mcpforunityserver mcp-for-unity --transport stdio
 ```
 
 ---
