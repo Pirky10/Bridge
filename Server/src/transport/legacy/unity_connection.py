@@ -42,6 +42,7 @@ class UnityConnection:
             self.port = stdio_port_registry.get_port(self.instance_id)
         self._io_lock = threading.Lock()
         self._conn_lock = threading.Lock()
+        self._needs_tool_resync = False  # Set True after reconnection
 
     def _prepare_socket(self, sock: socket.socket) -> None:
         try:
@@ -65,6 +66,7 @@ class UnityConnection:
                 self.sock = socket.create_connection(
                     (self.host, self.port), connect_timeout)
                 self._prepare_socket(self.sock)
+                self._needs_tool_resync = True
                 logger.debug(f"Connected to Unity at {self.host}:{self.port}")
 
                 # Strict handshake: require FRAMING=1
@@ -905,12 +907,6 @@ def send_command_with_retry(
     return response
 
 
-# Limit concurrent commands to Unity to prevent socket contention and timeouts
-# when AI clients fire many parallel tool calls. Extra commands wait in line.
-import asyncio as _asyncio
-_command_semaphore = _asyncio.Semaphore(3)
-
-
 async def async_send_command_with_retry(
     command_type: str,
     params: dict[str, Any],
@@ -922,10 +918,6 @@ async def async_send_command_with_retry(
     retry_on_reload: bool = True
 ) -> dict[str, Any] | MCPResponse:
     """Async wrapper that runs the blocking retry helper in a thread pool.
-
-    Uses a semaphore to limit concurrency — Unity processes commands
-    sequentially, so flooding it causes timeouts. Extra callers wait
-    in an async queue rather than timing out.
 
     Args:
         command_type: The command type to send
@@ -943,12 +935,58 @@ async def async_send_command_with_retry(
         import asyncio  # local import to avoid mandatory asyncio dependency for sync callers
         if loop is None:
             loop = asyncio.get_running_loop()
-        async with _command_semaphore:
-            return await loop.run_in_executor(
-                None,
-                lambda: send_command_with_retry(
-                    command_type, params, instance_id=instance_id, max_retries=max_retries,
-                    retry_ms=retry_ms, retry_on_reload=retry_on_reload),
+        result = await loop.run_in_executor(
+            None,
+            lambda: send_command_with_retry(
+                command_type, params, instance_id=instance_id, max_retries=max_retries,
+                retry_ms=retry_ms, retry_on_reload=retry_on_reload),
+        )
+
+        # After a successful command, check if the connection was freshly
+        # established (reconnection after domain reload).  If so, re-sync
+        # tool visibility and custom tool registration from Unity.
+        # Always clear the flag, but only schedule the background resync
+        # when this call is not itself get_tool_states (to avoid recursion).
+        try:
+            pool = get_unity_connection_pool()
+            conn = pool.get_connection(instance_id)
+            if getattr(conn, "_needs_tool_resync", False):
+                conn._needs_tool_resync = False
+                if command_type != "get_tool_states":
+                    logger.info(
+                        "Detected reconnection to Unity; scheduling tool re-sync"
+                    )
+                    asyncio.ensure_future(_resync_tools_after_reconnect(instance_id))
+        except Exception as exc:
+            logger.debug(
+                "Failed to schedule post-reconnection tool re-sync: %s",
+                exc,
             )
+
+        return result
     except Exception as e:
         return MCPResponse(success=False, error=str(e))
+
+
+async def _resync_tools_after_reconnect(instance_id: str | None) -> None:
+    """Background task: re-sync tool visibility and custom tools after reconnection."""
+    try:
+        from services.tools import sync_tool_visibility_from_unity
+        result = await sync_tool_visibility_from_unity(
+            instance_id=instance_id, notify=True,
+        )
+        if result.get("synced"):
+            logger.info(
+                "Post-reconnection tool re-sync complete: "
+                "enabled=[%s], disabled=[%s], custom_tools=%d",
+                ", ".join(result.get("enabled_groups", [])),
+                ", ".join(result.get("disabled_groups", [])),
+                result.get("custom_tool_count", 0),
+            )
+        else:
+            logger.debug(
+                "Post-reconnection tool re-sync skipped: %s",
+                result.get("error", "unknown"),
+            )
+    except Exception as exc:
+        logger.debug("Post-reconnection tool re-sync failed: %s", exc)
