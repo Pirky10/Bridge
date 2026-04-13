@@ -667,11 +667,11 @@ namespace MCPForUnity.Editor.Tools
             if (gravity == null || gravity.Length < 3)
                 return new ErrorResponse("'gravity' must be an array of 3 floats [x, y, z].");
 
-            Physics.gravity = new Vector3(gravity[0], gravity[1], gravity[2]);
+            UnityEngine.Physics.gravity = new Vector3(gravity[0], gravity[1], gravity[2]);
 
             return new SuccessResponse($"Set gravity to ({gravity[0]}, {gravity[1]}, {gravity[2]})", new
             {
-                gravity = new { x = Physics.gravity.x, y = Physics.gravity.y, z = Physics.gravity.z }
+                gravity = new { x = UnityEngine.Physics.gravity.x, y = UnityEngine.Physics.gravity.y, z = UnityEngine.Physics.gravity.z }
             });
         }
 
@@ -694,7 +694,7 @@ namespace MCPForUnity.Editor.Tools
             Vector3 rayOrigin = new Vector3(origin[0], origin[1], origin[2]);
             Vector3 rayDir = new Vector3(direction[0], direction[1], direction[2]).normalized;
 
-            if (Physics.Raycast(rayOrigin, rayDir, out RaycastHit hit, maxDistance))
+            if (UnityEngine.Physics.Raycast(rayOrigin, rayDir, out RaycastHit hit, maxDistance))
             {
                 return new SuccessResponse("Raycast hit", new
                 {
@@ -803,12 +803,12 @@ namespace MCPForUnity.Editor.Tools
             // Global physics info
             return new SuccessResponse("Global physics settings", new
             {
-                gravity = new { x = Physics.gravity.x, y = Physics.gravity.y, z = Physics.gravity.z },
-                defaultSolverIterations = Physics.defaultSolverIterations,
-                defaultSolverVelocityIterations = Physics.defaultSolverVelocityIterations,
-                bounceThreshold = Physics.bounceThreshold,
-                sleepThreshold = Physics.sleepThreshold,
-                defaultContactOffset = Physics.defaultContactOffset
+                gravity = new { x = UnityEngine.Physics.gravity.x, y = UnityEngine.Physics.gravity.y, z = UnityEngine.Physics.gravity.z },
+                defaultSolverIterations = UnityEngine.Physics.defaultSolverIterations,
+                defaultSolverVelocityIterations = UnityEngine.Physics.defaultSolverVelocityIterations,
+                bounceThreshold = UnityEngine.Physics.bounceThreshold,
+                sleepThreshold = UnityEngine.Physics.sleepThreshold,
+                defaultContactOffset = UnityEngine.Physics.defaultContactOffset
             });
         }
     }

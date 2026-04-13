@@ -47,7 +47,7 @@ namespace MCPForUnity.Editor.Tools
             if (l2 < 0) return new ErrorResponse($"Layer '{layer2}' not found.");
 
             bool collide = p.GetBool("collide", true);
-            Physics.IgnoreLayerCollision(l1, l2, !collide);
+            UnityEngine.Physics.IgnoreLayerCollision(l1, l2, !collide);
 
             return new SuccessResponse($"Set collision {layer1}<->{layer2} = {collide}");
         }
@@ -66,7 +66,7 @@ namespace MCPForUnity.Editor.Tools
             if (l1 < 0) return new ErrorResponse($"Layer '{layer1}' not found.");
             if (l2 < 0) return new ErrorResponse($"Layer '{layer2}' not found.");
 
-            Physics.IgnoreLayerCollision(l1, l2, true);
+            UnityEngine.Physics.IgnoreLayerCollision(l1, l2, true);
             return new SuccessResponse($"Ignoring collision: {layer1}<->{layer2}");
         }
 
@@ -91,7 +91,7 @@ namespace MCPForUnity.Editor.Tools
                 {
                     string n2 = LayerMask.LayerToName(j);
                     if (string.IsNullOrEmpty(n2)) continue;
-                    if (Physics.GetIgnoreLayerCollision(i, j))
+                    if (UnityEngine.Physics.GetIgnoreLayerCollision(i, j))
                         ignoredPairs.Add($"{n1} <-> {n2}");
                 }
             }
@@ -108,7 +108,7 @@ namespace MCPForUnity.Editor.Tools
         {
             for (int i = 0; i < 32; i++)
                 for (int j = i; j < 32; j++)
-                    Physics.IgnoreLayerCollision(i, j, false);
+                    UnityEngine.Physics.IgnoreLayerCollision(i, j, false);
 
             return new SuccessResponse("Reset all layer collisions to enabled.");
         }

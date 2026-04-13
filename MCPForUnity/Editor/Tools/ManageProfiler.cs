@@ -8,6 +8,7 @@ using UnityEngine.Profiling;
 
 namespace MCPForUnity.Editor.Tools
 {
+    using UProfiler = UnityEngine.Profiling.Profiler;
     [McpForUnityTool("manage_profiler", AutoRegister = false)]
     public static class ManageProfiler
     {
@@ -55,7 +56,7 @@ namespace MCPForUnity.Editor.Tools
                 { "platform", Application.platform.ToString() },
                 { "unityVersion", Application.unityVersion },
                 { "systemLanguage", Application.systemLanguage.ToString() },
-                { "profilerEnabled", Profiler.enabled }
+                { "profilerEnabled", UProfiler.enabled }
             };
 
             if (isPlaying)
@@ -73,44 +74,44 @@ namespace MCPForUnity.Editor.Tools
         {
             string logFile = p.Get("log_file");
 
-            Profiler.enabled = true;
+            UProfiler.enabled = true;
 
             if (!string.IsNullOrEmpty(logFile))
             {
-                Profiler.logFile = logFile;
-                Profiler.enableBinaryLog = true;
+                UProfiler.logFile = logFile;
+                UProfiler.enableBinaryLog = true;
             }
 
             return new SuccessResponse("Profiler recording started", new
             {
-                enabled = Profiler.enabled,
-                logFile = Profiler.logFile
+                enabled = UProfiler.enabled,
+                logFile = UProfiler.logFile
             });
         }
 
         private static object StopRecording(JObject @params, ToolParams p)
         {
-            Profiler.enabled = false;
-            Profiler.enableBinaryLog = false;
+            UProfiler.enabled = false;
+            UProfiler.enableBinaryLog = false;
 
-            string logFile = Profiler.logFile;
-            Profiler.logFile = "";
+            string logFile = UProfiler.logFile;
+            UProfiler.logFile = "";
 
             return new SuccessResponse("Profiler recording stopped", new
             {
                 logFile = logFile,
-                enabled = Profiler.enabled
+                enabled = UProfiler.enabled
             });
         }
 
         private static object GetMemoryInfo(JObject @params, ToolParams p)
         {
-            long totalAllocated = Profiler.GetTotalAllocatedMemoryLong();
-            long totalReserved = Profiler.GetTotalReservedMemoryLong();
-            long totalUnused = Profiler.GetTotalUnusedReservedMemoryLong();
-            long monoHeap = Profiler.GetMonoHeapSizeLong();
-            long monoUsed = Profiler.GetMonoUsedSizeLong();
-            long tempAllocator = Profiler.GetTempAllocatorSize();
+            long totalAllocated = UProfiler.GetTotalAllocatedMemoryLong();
+            long totalReserved = UProfiler.GetTotalReservedMemoryLong();
+            long totalUnused = UProfiler.GetTotalUnusedReservedMemoryLong();
+            long monoHeap = UProfiler.GetMonoHeapSizeLong();
+            long monoUsed = UProfiler.GetMonoUsedSizeLong();
+            long tempAllocator = UProfiler.GetTempAllocatorSize();
 
             return new SuccessResponse("Memory info", new
             {
