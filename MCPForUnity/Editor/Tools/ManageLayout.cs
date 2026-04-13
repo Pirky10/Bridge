@@ -1,3 +1,4 @@
+#if HAS_UNITY_UI
 using System;
 using MCPForUnity.Editor.Helpers;
 using Newtonsoft.Json.Linq;
@@ -308,3 +309,4 @@ namespace MCPForUnity.Editor.Tools
         }
     }
 }
+#endif

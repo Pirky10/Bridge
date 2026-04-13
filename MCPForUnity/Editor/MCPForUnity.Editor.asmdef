@@ -2,7 +2,8 @@
     "name": "MCPForUnity.Editor",
     "rootNamespace": "MCPForUnity.Editor",
     "references": [
-        "MCPForUnity.Runtime"
+        "MCPForUnity.Runtime",
+        "Unity.ugui"
     ],
     "includePlatforms": [
         "Editor"
@@ -14,6 +15,12 @@
     ],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.ugui",
+            "expression": "",
+            "define": "HAS_UNITY_UI"
+        }
+    ],
     "noEngineReferences": false
 }
