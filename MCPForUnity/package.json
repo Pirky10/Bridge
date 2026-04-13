@@ -1,6 +1,6 @@
 {
   "name": "com.bridgeai.unity-mcp",
-  "version": "2.1.1-beta.1",
+  "version": "2.2.0",
   "displayName": "MCP for Unity",
   "description": "A bridge that connects AI assistants to Unity via the MCP (Model Context Protocol). Allows AI clients like Claude Code, Cursor, and VSCode to directly control your Unity Editor for enhanced development workflows.\n\nFeatures automated setup wizard, cross-platform support, and seamless integration with popular AI development tools.",
   "unity": "2021.3",
