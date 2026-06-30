@@ -4,6 +4,8 @@
 [![python](https://img.shields.io/badge/Python-3.10+-3776AB.svg?style=flat&logo=python&logoColor=white)](https://www.python.org)
 [![License](https://img.shields.io/badge/License-MIT-red.svg 'MIT License')](https://opensource.org/licenses/MIT)
 [![Discord](https://img.shields.io/badge/discord-join-red.svg?logo=discord&logoColor=white)](https://discord.gg/y4p8KfzrN4)
+[![PyPI version](https://img.shields.io/pypi/v/mcpforunityserver?label=PyPI)](https://pypi.org/project/mcpforunityserver/)
+[![Downloads](https://static.pepy.tech/badge/mcpforunityserver)](https://pepy.tech/project/mcpforunityserver)
 
 Model Context Protocol server for Unity Editor integration. Control Unity through natural language using AI assistants like Claude, Cursor, and more.
 
@@ -69,7 +71,7 @@ Use this to run the latest released version from the repository. Change the vers
       "command": "uvx",
       "args": [
         "--from",
-        "git+https://github.com/CoplayDev/unity-mcp@v2.2.0#subdirectory=Server",
+        "git+https://github.com/Pirky10/Bridge@v10.0.0#subdirectory=Server",
         "mcp-for-unity",
         "--transport",
         "stdio"
@@ -147,6 +149,7 @@ These options apply to the `mcp-for-unity` command (whether run via `uvx`, Docke
 - `UNITY_MCP_HTTP_REMOTE_HOSTED` - Enable remote-hosted mode (`true`, `1`, or `yes`)
 - `UNITY_MCP_DEFAULT_INSTANCE` - Default Unity instance to target (project name, hash, or `Name@hash`)
 - `UNITY_MCP_SKIP_STARTUP_CONNECT=1` - Skip initial Unity connection attempt on startup
+- `UNITY_MCP_LOG_DIR` - Override the rotating server log directory. Default: `%LOCALAPPDATA%\UnityMCP\Logs` (Windows), `~/Library/Application Support/UnityMCP/Logs` (macOS), `$XDG_STATE_HOME/UnityMCP/Logs` (Linux/BSD, defaults to `~/.local/state/UnityMCP/Logs`).
 
 API key authentication (remote-hosted mode):
 
@@ -270,7 +273,7 @@ Once connected, try these commands in your AI assistant:
 
 For complete documentation, troubleshooting, and advanced usage:
 
-📖 **[Full Documentation](https://github.com/CoplayDev/unity-mcp#readme)**
+📖 **[Full Documentation](https://coplaydev.github.io/unity-mcp/)**
 
 ---
 

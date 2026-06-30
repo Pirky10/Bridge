@@ -144,7 +144,8 @@ class GetTestJobResponse(MCPResponse):
 
 
 @mcp_for_unity_tool(
-    description="Starts a Unity test run asynchronously and returns a job_id immediately. Use action='poll' with a job_id to check progress. Actions: start (default), poll.",
+    group="testing",
+    description="Starts a Unity test run asynchronously and returns a job_id immediately. Poll with get_test_job or use action='poll' with a job_id for backward compatibility.",
     annotations=ToolAnnotations(
         title="Run Tests",
         destructiveHint=True,
@@ -173,11 +174,17 @@ async def run_tests(
                             "(action='poll' only) Wait up to this many seconds for tests to complete before returning. "
                             "Reduces polling frequency and avoids client-side loop detection. "
                             "Recommended: 30-60 seconds. Returns immediately if tests complete sooner."] = None,
+    init_timeout: Annotated[int | None,
+                            "Initialization timeout in milliseconds. PlayMode tests may need longer "
+                            "due to domain reload (default: 15000). Recommended: 120000 for PlayMode."] = None,
 ) -> RunTestsStartResponse | GetTestJobResponse | MCPResponse:
+    if init_timeout is not None and init_timeout <= 0:
+        return MCPResponse(success=False, error="init_timeout must be a positive integer (milliseconds) or None")
+
     if action == "poll":
         if not job_id:
             return MCPResponse(success=False, error="job_id is required for action='poll'")
-        return await _poll_test_job(ctx, job_id, include_failed_tests, include_details, wait_timeout)
+        return await get_test_job(ctx, job_id, include_failed_tests, include_details, wait_timeout)
 
     # action == "start"
     unity_instance = await get_unity_instance_from_context(ctx)
@@ -209,6 +216,8 @@ async def run_tests(
         params["includeFailedTests"] = True
     if include_details:
         params["includeDetails"] = True
+    if init_timeout is not None and init_timeout > 0:
+        params["initTimeout"] = init_timeout
 
     response = await unity_transport.send_with_unity_instance(
         async_send_command_with_retry,
@@ -224,7 +233,15 @@ async def run_tests(
     return MCPResponse(success=False, error=str(response))
 
 
-async def _poll_test_job(
+@mcp_for_unity_tool(
+    group="testing",
+    description="Polls an async Unity test job by job_id.",
+    annotations=ToolAnnotations(
+        title="Get Test Job",
+        readOnlyHint=True,
+    ),
+)
+async def get_test_job(
     ctx: Context,
     job_id: Annotated[str, "Job id returned by run_tests"],
     include_failed_tests: Annotated[bool,

@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using MCPForUnity.Editor.Helpers;
 using MCPForUnity.Editor.Resources;
+using MCPForUnity.Runtime.Helpers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -57,9 +58,19 @@ namespace MCPForUnity.Editor.Tools
         /// </summary>
         private static void AutoDiscoverCommands()
         {
+            // AssetImportWorker is a separate Editor subprocess. It doesn't host the MCP
+            // transport so the registry is unused there, and Mono can hard-crash inside
+            // GetCustomAttribute<T>() when scanning types whose owning assembly hasn't
+            // finished domain-reload bookkeeping in the worker. Skip the scan there
+            // entirely. See issue #1134.
+            if (IsRunningInAssetImportWorker())
+            {
+                return;
+            }
+
             try
             {
-                var allTypes = AppDomain.CurrentDomain.GetAssemblies()
+                var allTypes = UnityAssembliesCompat.GetLoadedAssemblies()
                     .Where(a => !a.IsDynamic)
                     .SelectMany(a =>
                     {
@@ -68,10 +79,11 @@ namespace MCPForUnity.Editor.Tools
                     })
                     .ToList();
 
-                // Discover tools — deduplicate by FullName to avoid double-registration
-                // when the same type is visible from multiple loaded assemblies.
+                // Discover tools - use safe attribute checks and deduplicate by
+                // FullName to avoid double-registration when the same type is
+                // visible from multiple loaded assemblies.
                 var toolTypes = allTypes
-                    .Where(t => t.GetCustomAttribute<McpForUnityToolAttribute>() != null)
+                    .Where(t => HasAttributeSafe<McpForUnityToolAttribute>(t))
                     .GroupBy(t => t.FullName)
                     .Select(g => g.First());
                 int toolCount = 0;
@@ -81,9 +93,9 @@ namespace MCPForUnity.Editor.Tools
                         toolCount++;
                 }
 
-                // Discover resources — same deduplication
+                // Discover resources - same safe attribute checks and deduplication.
                 var resourceTypes = allTypes
-                    .Where(t => t.GetCustomAttribute<McpForUnityResourceAttribute>() != null)
+                    .Where(t => HasAttributeSafe<McpForUnityResourceAttribute>(t))
                     .GroupBy(t => t.FullName)
                     .Select(g => g.First());
                 int resourceCount = 0;
@@ -99,6 +111,64 @@ namespace MCPForUnity.Editor.Tools
             {
                 McpLog.Error($"Failed to auto-discover MCP commands: {ex.Message}");
             }
+        }
+
+        private static bool HasAttributeSafe<T>(Type type) where T : Attribute
+        {
+            try
+            {
+                return type.GetCustomAttribute<T>() != null;
+            }
+            catch
+            {
+                // Type metadata can be in a half-loaded state during domain reload; treat
+                // those as "no attribute" rather than aborting the whole scan.
+                return false;
+            }
+        }
+
+        private static bool? _cachedIsAssetImportWorker;
+
+        private static bool IsRunningInAssetImportWorker()
+        {
+            if (_cachedIsAssetImportWorker.HasValue)
+                return _cachedIsAssetImportWorker.Value;
+
+            bool result = false;
+            try
+            {
+                // AssetDatabase.IsAssetImportWorkerProcess() exists on Unity 2020.2+ but the
+                // visibility has shifted between versions. Look it up reflectively so we
+                // tolerate either signature without conditional compilation.
+                var method = typeof(UnityEditor.AssetDatabase).GetMethod(
+                    "IsAssetImportWorkerProcess",
+                    BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+                if (method != null && method.GetParameters().Length == 0)
+                {
+                    result = method.Invoke(null, null) is bool b && b;
+                }
+            }
+            catch
+            {
+                // Reflection problems shouldn't break startup; fall through to the cmdline check.
+            }
+
+            if (!result)
+            {
+                try
+                {
+                    string cmd = Environment.CommandLine ?? string.Empty;
+                    if (cmd.IndexOf("-importWorker", StringComparison.OrdinalIgnoreCase) >= 0
+                        || cmd.IndexOf("AssetImportWorker", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        result = true;
+                    }
+                }
+                catch { }
+            }
+
+            _cachedIsAssetImportWorker = result;
+            return result;
         }
 
         /// <summary>

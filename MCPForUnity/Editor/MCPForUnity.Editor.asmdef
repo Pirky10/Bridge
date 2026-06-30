@@ -9,7 +9,7 @@
         "Editor"
     ],
     "excludePlatforms": [],
-    "overrideReferences": false,
+    "overrideReferences": true,
     "precompiledReferences": [
         "Newtonsoft.Json.dll"
     ],
@@ -20,6 +20,11 @@
             "name": "com.unity.ugui",
             "expression": "",
             "define": "HAS_UNITY_UI"
+        },
+        {
+            "name": "com.unity.visualeffectgraph",
+            "expression": "0.0.0",
+            "define": "UNITY_VFX_GRAPH"
         }
     ],
     "noEngineReferences": false

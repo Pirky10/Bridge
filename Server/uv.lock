@@ -107,6 +107,44 @@ wheels = [
 ]
 
 [[package]]
+name = "bridge-ai-unity-mcp"
+version = "10.0.0"
+source = { editable = "." }
+dependencies = [
+    { name = "click" },
+    { name = "fastapi" },
+    { name = "fastmcp" },
+    { name = "httpx" },
+    { name = "mcp" },
+    { name = "pydantic" },
+    { name = "tomli" },
+    { name = "uvicorn" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-cov" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "click", specifier = ">=8.1.0" },
+    { name = "fastapi", specifier = ">=0.104.0" },
+    { name = "fastmcp", specifier = ">=3.0.2,<4" },
+    { name = "httpx", specifier = ">=0.27.2" },
+    { name = "mcp", specifier = ">=1.16.0" },
+    { name = "pydantic", specifier = ">=2.12.5" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0.0" },
+    { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.23" },
+    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=4.1.0" },
+    { name = "tomli", specifier = ">=2.3.0" },
+    { name = "uvicorn", specifier = ">=0.35.0" },
+]
+provides-extras = ["dev"]
+
+[[package]]
 name = "cachetools"
 version = "6.2.4"
 source = { registry = "https://pypi.org/simple" }
@@ -855,44 +893,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/d5/2d/649d80a0ecf6a1f82
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e2/fc/6dc7659c2ae5ddf280477011f4213a74f806862856b796ef08f028e664bf/mcp-1.25.0-py3-none-any.whl", hash = "sha256:b37c38144a666add0862614cc79ec276e97d72aa8ca26d622818d4e278b9721a", size = 233076, upload-time = "2025-12-19T10:19:55.416Z" },
 ]
-
-[[package]]
-name = "mcpforunityserver"
-version = "9.6.5"
-source = { editable = "." }
-dependencies = [
-    { name = "click" },
-    { name = "fastapi" },
-    { name = "fastmcp" },
-    { name = "httpx" },
-    { name = "mcp" },
-    { name = "pydantic" },
-    { name = "tomli" },
-    { name = "uvicorn" },
-]
-
-[package.optional-dependencies]
-dev = [
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-    { name = "pytest-cov" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "click", specifier = ">=8.1.0" },
-    { name = "fastapi", specifier = ">=0.104.0" },
-    { name = "fastmcp", specifier = ">=3.0.2,<4" },
-    { name = "httpx", specifier = ">=0.27.2" },
-    { name = "mcp", specifier = ">=1.16.0" },
-    { name = "pydantic", specifier = ">=2.12.5" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0.0" },
-    { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.23" },
-    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=4.1.0" },
-    { name = "tomli", specifier = ">=2.3.0" },
-    { name = "uvicorn", specifier = ">=0.35.0" },
-]
-provides-extras = ["dev"]
 
 [[package]]
 name = "mdurl"

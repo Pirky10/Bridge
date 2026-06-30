@@ -1,6 +1,6 @@
 [project]
 name = "bridge-ai-unity-mcp"
-version = "2.2.0"
+version = "10.0.0"
 description = "MCP for Unity Server: A Unity package for Unity Editor integration via the Model Context Protocol (MCP)."
 readme = "README.md"
 license = "MIT"
@@ -47,8 +47,11 @@ dev = [
 ]
 
 [project.urls]
-Repository = "https://github.com/CoplayDev/unity-mcp.git"
-Issues = "https://github.com/CoplayDev/unity-mcp/issues"
+Homepage = "https://github.com/Pirky10/Bridge"
+Documentation = "https://github.com/Pirky10/Bridge#readme"
+Repository = "https://github.com/Pirky10/Bridge.git"
+Issues = "https://github.com/Pirky10/Bridge/issues"
+Changelog = "https://github.com/Pirky10/Bridge/releases"
 
 [project.scripts]
 mcp-for-unity = "main:main"

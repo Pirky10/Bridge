@@ -49,6 +49,7 @@ namespace MCPForUnity.Editor.Constants
         internal const string ResourceFoldoutStatePrefix = "MCPForUnity.ResourceFoldout.";
         internal const string EditorWindowActivePanel = "MCPForUnity.EditorWindow.ActivePanel";
         internal const string LastSelectedClientId = "MCPForUnity.LastSelectedClientId";
+        internal const string ClientDetailsFoldoutOpen = "MCPForUnity.ClientConfig.DetailsFoldoutOpen";
 
         internal const string SetupCompleted = "MCPForUnity.SetupCompleted";
         internal const string SetupDismissed = "MCPForUnity.SetupDismissed";
@@ -67,9 +68,19 @@ namespace MCPForUnity.Editor.Constants
         internal const string ApiKey = "MCPForUnity.ApiKey";
 
         internal const string AutoStartOnLoad = "MCPForUnity.AutoStartOnLoad";
+        internal const string HttpServerLaunchConfirmed = "MCPForUnity.HttpServerLaunchConfirmed";
         internal const string BatchExecuteMaxCommands = "MCPForUnity.BatchExecute.MaxCommands";
         internal const string LogRecordEnabled = "MCPForUnity.LogRecordEnabled";
 
         internal const string ExecuteCodeCompiler = "MCPForUnity.ExecuteCode.Compiler";
+
+        // AI Asset Generation — NON-SECRET config only. Provider API keys live in the OS
+        // secure store (MCPForUnity.Editor.Security.SecureKeyStore), never in EditorPrefs.
+        internal const string AssetGenSelectedModelProvider = "MCPForUnity.AssetGen.ModelProvider";
+        internal const string AssetGenSelectedImageProvider = "MCPForUnity.AssetGen.ImageProvider";
+        internal const string AssetGenDefaultFormat = "MCPForUnity.AssetGen.Format";
+        internal const string AssetGenOutputRoot = "MCPForUnity.AssetGen.OutputRoot";
+        internal const string AssetGenAutoNormalize = "MCPForUnity.AssetGen.AutoNormalize";
+        internal const string AssetGenProviderEnabledPrefix = "MCPForUnity.AssetGen.Enabled.";
     }
 }
